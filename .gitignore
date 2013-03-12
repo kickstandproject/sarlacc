@@ -1,0 +1,9 @@
+*.egg
+*.egg-info
+*.pyc
+.tox
+AUTHORS
+ChangeLog
+dist/*
+doc/build/*
+sarlacc/versioninfo
