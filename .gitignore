@@ -1,7 +1,8 @@
 *.egg
 *.egg-info
 *.pyc
-.tox
+.testrepository/*
+.tox/*
 AUTHORS
 ChangeLog
 dist/*

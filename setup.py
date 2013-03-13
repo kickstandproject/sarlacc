@@ -29,11 +29,11 @@ setuptools.setup(
     author='Paul Belanger',
     author_email='paul.belanger@polybeacon.com',
     url='https://github.com/kickstandproject/sarlacc',
-    packages=setuptools.find_packages(exclude=['tests', 'tests.*']),
-    include_package_data=True,
     cmdclass=setup.get_cmdclass(),
+    packages=setuptools.find_packages(),
     install_requires=requires,
-    setup_requires=['setuptools_git>=0.4'],
     dependency_links=depend_links,
-    zip_safe=False
+    include_package_data=True,
+    test_suite='nose.collector',
+    setup_requires=['setuptools_git>=0.4'],
 )
