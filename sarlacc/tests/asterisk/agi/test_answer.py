@@ -17,7 +17,6 @@ from cStringIO import StringIO
 from mock import patch
 from sarlacc import test
 from sarlacc.asterisk.agi import AGI
-import sys
 
 
 class TestCase(test.TestCase):

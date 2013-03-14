@@ -17,7 +17,6 @@ from cStringIO import StringIO
 from mock import patch
 from sarlacc import test
 from sarlacc.asterisk.agi import AGI
-import sys
 
 
 class TestCase(test.TestCase):
@@ -34,8 +33,8 @@ class TestCase(test.TestCase):
             self.assertEqual(
                 mocked_out.getvalue(), 'GET VARIABLE Sipdomain\n'
             )
-            self.assertEqual(res, 0)
-            self.assertEqual(data, "")
+            self.assertFalse(res)
+            self.assertEqual(data, '')
 
     def test_get_variable_success(self):
         with patch('sys.stdin', StringIO("200 result=1 (example.org)")
@@ -45,5 +44,5 @@ class TestCase(test.TestCase):
             self.assertEqual(
                 mocked_out.getvalue(), 'GET VARIABLE SIPDOMAIN\n'
             )
-            self.assertEqual(res, 1)
-            self.assertEqual(data, "example.org")
+            self.assertTrue(res)
+            self.assertEqual(data, 'example.org')

@@ -17,15 +17,17 @@
 Asterisk AGI
 """
 
-import re
-import sys
+import logging
+from sarlacc.utils import agi_send, agi_setup_env
+
+LOG = logging.getLogger(__name__)
 
 
 class AGI(object):
     env = {}
 
     def __init__(self):
-        self._setup_env()
+        self.env = agi_setup_env()
 
     def answer(self):
         """
@@ -36,10 +38,55 @@ class AGI(object):
             Success: True
         """
         cmd = 'ANSWER'
-        code, res = self._send(cmd)[:2]
-        if res != 0:
+        res = agi_send(cmd)[1]
+        if res != '0':
             return False
         return True
+
+    def get_data(self, filename, digits, timeout=0):
+        """
+        Plays the audio file to the current channel.
+
+        :param filename:
+            Name of the file you wish to be played. The extension must not be
+            included in the filename.
+
+        :type filename:
+            str
+
+        :param digits:
+            Number of DTMF to interrupt the audio stream. Note: The value must
+            be greater the 0 otherwise asterisk will return failure.
+
+        :type digits:
+            str
+
+        :param timeout:
+            The amount of time, in milliseconds, to wait after the last DTMF is
+            recieved.
+
+        :type timeout:
+            str
+
+        :returns:
+            Failure: False
+            Success: True
+        """
+        ret_timeout = False
+        result = True
+
+        cmd = 'GET DATA %s %s %s' % (filename, timeout, digits)
+        res, args = agi_send(cmd)[1:]
+        dtmf = res
+
+        if res == '-1':
+            dtmf = ''
+            result = False
+
+        if args[1:-1] == 'timeout':
+            ret_timeout = True
+
+        return result, dtmf, ret_timeout
 
     def get_variable(self, name):
         """
@@ -52,12 +99,15 @@ class AGI(object):
             str
 
         :returns:
-            String
+            Failure: False, ''
+            Success: True, Value
         """
         cmd = 'GET VARIABLE %s' % name
-        code, res, args = self._send(cmd)
+        res, args = agi_send(cmd)[1:]
 
-        return res, args[1:-1]
+        if res != '1':
+            return False, ''
+        return True, args[1:-1]
 
     def hangup(self, channel=None):
         """
@@ -77,9 +127,9 @@ class AGI(object):
         cmd = 'HANGUP'
         if channel is not None:
             cmd += ' %s' % channel
-        code, res = self._send(cmd)[:2]
+        res = agi_send(cmd)[1]
 
-        if res != 1:
+        if res != '1':
             return False
         return True
 
@@ -104,11 +154,55 @@ class AGI(object):
             Success: True
         """
         cmd = 'SET VARIABLE %s %s' % (name, value)
-        code, res = self._send(cmd)[:2]
+        res = agi_send(cmd)[1]
 
-        if res != 1:
+        if res != '1':
             return False
         return True
+
+    def stream_file(self, name, digits="", offset="0"):
+        """
+        Plays the audio file to the current channel.
+
+        :param name:
+            Filename to play.  The extension must not be included in the
+            filename.
+
+        :type name:
+            str
+
+        :param digits:
+            Digits to interrupt audio stream.
+
+        :type digits:
+            str
+
+        :param offset:
+            If an offset is provided the audio will seek to the offset before
+            play starts.
+
+        :type offset:
+            str
+
+        :returns:
+            Failure: False
+            Success: True
+        """
+        result = True
+        dtmf = ''
+
+        cmd = 'STREAM FILE %s "%s" %s' % (name, digits, offset)
+        res, args = agi_send(cmd)[1:]
+        endpos = args.replace('endpos=', '')
+
+        if res == '-1':
+            result = False
+        elif res == '0' and endpos == '0':
+            result = False
+        if res > '0':
+            dtmf = chr(int(res))
+
+        return result, dtmf, endpos
 
     def verbose(self, level, message):
         """
@@ -131,44 +225,8 @@ class AGI(object):
             Success: True
         """
         cmd = 'VERBOSE "%s" %s' % (message, level)
-        code, res = self._send(cmd)[:2]
+        res = agi_send(cmd)[1]
 
-        if res != 1:
+        if res != '1':
             return False
         return True
-
-    def _send(self, data):
-        sys.stdout.write("%s\n" % data)
-        sys.stdout.flush()
-        code, result, args = self._read()
-        return code, result, args
-
-    def _read(self):
-        res = sys.stdin.readline().strip()
-        return self._parse_result(res)
-
-    def _parse_result(self, data):
-        pattern = r'(-?\d{1,3})\s?(.*)'
-        match = re.match(pattern, data)
-        if match:
-            code = int(match.group(1))
-            result = match.group(2)
-            if code == 200:
-                result = result.replace('result=', '')
-                res, args = self._parse_result(result)[:2]
-                return (code, res, args)
-            return (code, result, '')
-        else:
-            return (100, -99, '')
-
-    def _setup_env(self):
-        while True:
-            try:
-                line = sys.stdin.readline().strip()
-            except EOFError:
-                break
-            if not line:
-                break
-            data = line.split(":")
-            if len(data) == 2:
-                self.env[data[0].strip()] = data[1].strip()
