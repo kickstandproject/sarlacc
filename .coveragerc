@@ -1,0 +1,7 @@
+[run]
+branch = True
+source = sarlacc
+omit = sarlacc/openstack/*
+
+[report]
+ignore-errors = True

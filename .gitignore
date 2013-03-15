@@ -1,10 +1,12 @@
 *.egg
 *.egg-info
 *.pyc
+.coverage
 .testrepository/*
 .tox/*
 AUTHORS
 ChangeLog
+cover/*
 dist/*
 doc/build/*
 sarlacc/versioninfo
