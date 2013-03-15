@@ -20,18 +20,29 @@ from sarlacc.tests.asterisk.agi import test
 
 class TestCase(test.TestCase):
 
-    def test_answer_failure(self):
+    def test_say_digits_failure(self):
         with patch('sys.stdin', StringIO("200 result=-1")
                    ), patch('sys.stdout',
                             new_callable=StringIO) as mocked_out:
-            res = self.agi.answer()
-            self.assertEqual(mocked_out.getvalue(), 'ANSWER\n')
+            res, dtmf = self.agi.say_digits(string='2000')
+            self.assertEqual(mocked_out.getvalue(), 'SAY DIGITS 2000 ""\n')
             self.assertFalse(res)
+            self.assertEqual(dtmf, '')
 
-    def test_answer_success(self):
+    def test_say_digits_success(self):
         with patch('sys.stdin', StringIO("200 result=0")
                    ), patch('sys.stdout',
                             new_callable=StringIO) as mocked_out:
-            res = self.agi.answer()
-            self.assertEqual(mocked_out.getvalue(), 'ANSWER\n')
+            res, dtmf = self.agi.say_digits(string='25000')
+            self.assertEqual(mocked_out.getvalue(), 'SAY DIGITS 25000 ""\n')
             self.assertTrue(res)
+            self.assertEqual(dtmf, '')
+
+    def test_say_digits_digit_pressed(self):
+        with patch('sys.stdin', StringIO("200 result=49")
+                   ), patch('sys.stdout',
+                            new_callable=StringIO) as mocked_out:
+            res, dtmf = self.agi.say_digits(string='5000', digits='1234')
+            self.assertEqual(mocked_out.getvalue(), 'SAY DIGITS 5000 "1234"\n')
+            self.assertTrue(res)
+            self.assertEqual(dtmf, '1')

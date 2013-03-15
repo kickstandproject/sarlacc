@@ -43,7 +43,7 @@ class AGI(object):
             return False
         return True
 
-    def get_data(self, filename, digits, timeout=0):
+    def get_data(self, filename, digits, timeout='0'):
         """
         Plays the audio file to the current channel.
 
@@ -55,7 +55,7 @@ class AGI(object):
             str
 
         :param digits:
-            Number of DTMF to interrupt the audio stream. Note: The value must
+            Maximum number of digits the user can enter. Note: The value must
             be greater the 0 otherwise asterisk will return failure.
 
         :type digits:
@@ -87,6 +87,38 @@ class AGI(object):
             ret_timeout = True
 
         return result, dtmf, ret_timeout
+
+    def get_option(self, filename, digits='', timeout='0'):
+        """
+        Plays the audio file to the current channel.
+
+        :param filename:
+            Filename to play.  The extension must not be included in the
+            filename.
+
+        :type filename:
+            str
+
+        :param digits:
+            Digits to interrupt audio stream.
+
+        :type digits:
+            str
+
+        :param timeout:
+            The amount of time, in milliseconds, to wait after the last DTMF is
+            recieved.
+
+        :type timeout:
+            str
+
+        :returns:
+            Failure: False
+            Success: True
+        """
+        cmd = 'GET OPTION %s "%s" %s' % (filename, digits, timeout)
+
+        return self._parse_get_option_or_stream_file(cmd)
 
     def get_variable(self, name):
         """
@@ -133,18 +165,132 @@ class AGI(object):
             return False
         return True
 
+    def noop(self):
+        """
+        Do nothing.
+
+        This function does nothing.
+
+        :returns:
+            True
+        """
+        cmd = 'NOOP'
+        agi_send(cmd)
+
+        return True
+
+    def say_alpha(self, string, digits=''):
+        """
+        Say a given character string.
+
+        :param string:
+
+        :type string:
+            str
+
+        :param digits:
+            Digits to interrupt audio stream.
+
+        :type digits:
+            str
+
+        :returns:
+            bool, string
+
+        """
+        cmd = 'SAY ALPHA %s "%s"' % (string, digits)
+
+        return self._parse_digit_response(cmd)
+
+    def say_digits(self, string, digits=''):
+        """
+        Say a given digit string.
+
+        :param string:
+
+        :type string:
+            str
+
+        :param digits:
+            Digits to interrupt audio stream.
+
+        :type digits:
+            str
+
+        :returns:
+            bool, string
+
+        """
+        cmd = 'SAY DIGITS %s "%s"' % (string, digits)
+
+        return self._parse_digit_response(cmd)
+
+    def say_number(self, string, digits='', gender=None):
+        """
+        Say a given number.
+
+        :param string:
+
+        :type string:
+            str
+
+        :param digits:
+            Digits to interrupt audio stream.
+
+        :type digits:
+            str
+
+        :param gender:
+            Set to 'f' for female or 'm' for male.
+
+        :type digits:
+            str
+
+        :returns:
+            bool, string
+
+        """
+        cmd = 'SAY NUMBER %s "%s"' % (string, digits)
+        if gender is True:
+            cmd += ' m'
+        elif gender is False:
+            cmd += ' f'
+
+        return self._parse_digit_response(cmd)
+
+    def say_phonetic(self, string, digits=''):
+        """
+        Say a given character string with phonetics.
+
+        :param string:
+
+        :type number:
+            str
+
+        :param digits:
+            Digits to interrupt audio stream.
+
+        :type digits:
+            str
+
+        :returns:
+            bool, string
+
+        """
+        cmd = 'SAY PHONETIC %s "%s"' % (string, digits)
+
+        return self._parse_digit_response(cmd)
+
     def set_variable(self, name, value):
         """
-        Sets a channel variable.
+        Set channel variable.
 
         :param name:
-            Name of the channel variable
 
         :type name:
             str
 
         :param value:
-            Value of the channel variable
 
         :type value:
             str
@@ -157,15 +303,15 @@ class AGI(object):
 
         return True
 
-    def stream_file(self, name, digits="", offset="0"):
+    def stream_file(self, filename, digits='', offset='0'):
         """
         Plays the audio file to the current channel.
 
-        :param name:
+        :param filename:
             Filename to play.  The extension must not be included in the
             filename.
 
-        :type name:
+        :type filename:
             str
 
         :param digits:
@@ -185,34 +331,22 @@ class AGI(object):
             Failure: False
             Success: True
         """
-        result = True
-        dtmf = ''
+        cmd = 'STREAM FILE %s "%s" %s' % (filename, digits, offset)
 
-        cmd = 'STREAM FILE %s "%s" %s' % (name, digits, offset)
-        res, args = agi_send(cmd)[1:]
-        endpos = args.replace('endpos=', '')
-
-        if res == '-1':
-            result = False
-        elif res == '0' and endpos == '0':
-            result = False
-        if res > '0':
-            dtmf = chr(int(res))
-
-        return result, dtmf, endpos
+        return self._parse_get_option_or_stream_file(cmd)
 
     def verbose(self, level, message):
         """
         Log a message to the asterisk verbose log.
 
         :param level:
-            Verbosity level
+            Verbosity level.
 
         :type level:
             int
 
         :param message:
-            Text to be logged
+            Output text message.
 
         :type message:
             str
@@ -224,3 +358,50 @@ class AGI(object):
         agi_send(cmd)
 
         return True
+
+    def wait_for_digit(self, timeout):
+        """
+        Wait up to x amount of milliseconds for channel to receive a DTMF
+        digit.
+
+        :param timeout:
+            The amount of time, in milliseconds, to wait for DTMF.
+
+        :type timeout:
+            str
+
+        :returns:
+            bool, string
+        """
+        cmd = 'WAIT FOR DIGIT %s' % timeout
+
+        return self._parse_digit_response(cmd)
+
+    def _parse_digit_response(self, cmd):
+        result = True
+        digit = ''
+
+        res = agi_send(cmd)[1]
+
+        if res == '-1':
+            result = False
+        elif res > '0':
+            digit = chr(int(res))
+
+        return result, digit
+
+    def _parse_get_option_or_stream_file(self, cmd):
+        result = True
+        dtmf = ''
+
+        res, args = agi_send(cmd)[1:]
+        endpos = args.replace('endpos=', '')
+
+        if res == '-1':
+            result = False
+        elif res == '0' and endpos == '0':
+            result = False
+        if res > '0':
+            dtmf = chr(int(res))
+
+        return result, dtmf, endpos

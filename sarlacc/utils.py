@@ -27,7 +27,7 @@ LOG = logging.getLogger(__name__)
 def agi_send(data):
     sys.stdout.write("%s\n" % data)
     sys.stdout.flush()
-    LOG.debug("agi_send: '%s'" % data)
+    LOG.debug("agi_send: '%s'", data)
     code, result, args = _agi_read()
 
     return code, result, args
@@ -35,7 +35,7 @@ def agi_send(data):
 
 def _agi_read():
     res = sys.stdin.readline().strip()
-    LOG.debug("_agi_read: '%s'" % res)
+    LOG.debug("_agi_read: '%s'", res)
 
     return _agi_parse_result(res)
 

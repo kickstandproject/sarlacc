@@ -20,18 +20,29 @@ from sarlacc.tests.asterisk.agi import test
 
 class TestCase(test.TestCase):
 
-    def test_answer_failure(self):
+    def test_wait_for_digit_failure(self):
         with patch('sys.stdin', StringIO("200 result=-1")
                    ), patch('sys.stdout',
                             new_callable=StringIO) as mocked_out:
-            res = self.agi.answer()
-            self.assertEqual(mocked_out.getvalue(), 'ANSWER\n')
+            res, dtmf = self.agi.wait_for_digit(timeout='2000')
+            self.assertEqual(mocked_out.getvalue(), 'WAIT FOR DIGIT 2000\n')
             self.assertFalse(res)
+            self.assertEqual(dtmf, '')
 
-    def test_answer_success(self):
+    def test_wait_for_digit_success(self):
+        with patch('sys.stdin', StringIO("200 result=51")
+                   ), patch('sys.stdout',
+                            new_callable=StringIO) as mocked_out:
+            res, dtmf = self.agi.wait_for_digit(timeout='25000')
+            self.assertEqual(mocked_out.getvalue(), 'WAIT FOR DIGIT 25000\n')
+            self.assertTrue(res)
+            self.assertEqual(dtmf, '3')
+
+    def test_wait_for_digit_timeout(self):
         with patch('sys.stdin', StringIO("200 result=0")
                    ), patch('sys.stdout',
                             new_callable=StringIO) as mocked_out:
-            res = self.agi.answer()
-            self.assertEqual(mocked_out.getvalue(), 'ANSWER\n')
+            res, dtmf = self.agi.wait_for_digit(timeout='5000')
+            self.assertEqual(mocked_out.getvalue(), 'WAIT FOR DIGIT 5000\n')
             self.assertTrue(res)
+            self.assertEqual(dtmf, '')

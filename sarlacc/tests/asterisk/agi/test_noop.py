@@ -20,18 +20,10 @@ from sarlacc.tests.asterisk.agi import test
 
 class TestCase(test.TestCase):
 
-    def test_answer_failure(self):
-        with patch('sys.stdin', StringIO("200 result=-1")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
-            res = self.agi.answer()
-            self.assertEqual(mocked_out.getvalue(), 'ANSWER\n')
-            self.assertFalse(res)
-
-    def test_answer_success(self):
+    def test_noop_success(self):
         with patch('sys.stdin', StringIO("200 result=0")
                    ), patch('sys.stdout',
                             new_callable=StringIO) as mocked_out:
-            res = self.agi.answer()
-            self.assertEqual(mocked_out.getvalue(), 'ANSWER\n')
+            res = self.agi.noop()
+            self.assertEqual(mocked_out.getvalue(), 'NOOP\n')
             self.assertTrue(res)

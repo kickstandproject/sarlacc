@@ -15,21 +15,16 @@
 
 from cStringIO import StringIO
 from mock import patch
-from sarlacc import test
-from sarlacc.asterisk.agi import AGI
+from sarlacc.tests.asterisk.agi import test
 
 
 class TestCase(test.TestCase):
-
-    def setUp(self):
-        super(TestCase, self).setUp()
-        self.agi = AGI()
 
     def test_get_variable_failure(self):
         with patch('sys.stdin', StringIO("200 result=0")
                    ), patch('sys.stdout',
                             new_callable=StringIO) as mocked_out:
-            res, data = self.agi.get_variable('Sipdomain')
+            res, data = self.agi.get_variable(name='Sipdomain')
             self.assertEqual(
                 mocked_out.getvalue(), 'GET VARIABLE Sipdomain\n'
             )
@@ -40,7 +35,7 @@ class TestCase(test.TestCase):
         with patch('sys.stdin', StringIO("200 result=1 (example.org)")
                    ), patch('sys.stdout',
                             new_callable=StringIO) as mocked_out:
-            res, data = self.agi.get_variable('SIPDOMAIN')
+            res, data = self.agi.get_variable(name='SIPDOMAIN')
             self.assertEqual(
                 mocked_out.getvalue(), 'GET VARIABLE SIPDOMAIN\n'
             )

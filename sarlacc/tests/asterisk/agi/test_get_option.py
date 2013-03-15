@@ -20,58 +20,58 @@ from sarlacc.tests.asterisk.agi import test
 
 class TestCase(test.TestCase):
 
-    def test_stream_file_does_not_exist(self):
+    def test_get_option_does_not_exist(self):
         with patch('sys.stdin', StringIO("200 result=0 endpos=0")
                    ), patch('sys.stdout',
                             new_callable=StringIO) as mocked_out:
-            res, dtmf, endpos = self.agi.stream_file(
+            res, dtmf, endpos = self.agi.get_option(
                 filename='demo-congrats.gsm'
             )
             self.assertEqual(
                 mocked_out.getvalue(),
-                'STREAM FILE demo-congrats.gsm "" 0\n')
+                'GET OPTION demo-congrats.gsm "" 0\n')
             self.assertFalse(res)
             self.assertEqual(dtmf, '')
             self.assertEqual(endpos, '0')
 
-    def test_stream_file_failure(self):
+    def test_get_option_failure(self):
         with patch('sys.stdin', StringIO("200 result=-1 endpos=0")
                    ), patch('sys.stdout',
                             new_callable=StringIO) as mocked_out:
-            res, dtmf, endpos = self.agi.stream_file(
+            res, dtmf, endpos = self.agi.get_option(
                 filename='HelloWorld!'
             )
             self.assertEqual(
                 mocked_out.getvalue(),
-                'STREAM FILE HelloWorld! "" 0\n')
+                'GET OPTION HelloWorld! "" 0\n')
             self.assertFalse(res)
             self.assertEqual(dtmf, '')
             self.assertEqual(endpos, '0')
 
-    def test_stream_file_success(self):
+    def test_get_option_success(self):
         with patch('sys.stdin', StringIO("200 result=0 endpos=223680")
                    ), patch('sys.stdout',
                             new_callable=StringIO) as mocked_out:
-            res, dtmf, endpos = self.agi.stream_file(
+            res, dtmf, endpos = self.agi.get_option(
                 filename='demo-congrats'
             )
             self.assertEqual(
                 mocked_out.getvalue(),
-                'STREAM FILE demo-congrats "" 0\n')
+                'GET OPTION demo-congrats "" 0\n')
             self.assertTrue(res)
             self.assertEqual(dtmf, '')
             self.assertEqual(endpos, '223680')
 
-    def test_stream_file_digits_pressed(self):
+    def test_get_option_digits_pressed(self):
         with patch('sys.stdin', StringIO("200 result=50 endpos=135297")
                    ), patch('sys.stdout',
                             new_callable=StringIO) as mocked_out:
-            res, dtmf, endpos = self.agi.stream_file(
+            res, dtmf, endpos = self.agi.get_option(
                 filename='demo-congrats', digits='0123'
             )
             self.assertEqual(
                 mocked_out.getvalue(),
-                'STREAM FILE demo-congrats "0123" 0\n')
+                'GET OPTION demo-congrats "0123" 0\n')
             self.assertTrue(res)
             self.assertEqual(dtmf, '2')
             self.assertEqual(endpos, '135297')

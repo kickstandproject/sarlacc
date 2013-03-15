@@ -13,17 +13,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 # implied.
 
-from cStringIO import StringIO
-from mock import patch
-from sarlacc.tests.asterisk.agi import test
+from sarlacc.asterisk.agi import AGI
+from sarlacc import test
 
 
 class TestCase(test.TestCase):
+    """Test case base class for all unit tests."""
 
-    def test_set_variable_success(self):
-        with patch('sys.stdin', StringIO("200 result=1")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
-            res = self.agi.set_variable(name='FOO', value='BAR')
-            self.assertEqual(mocked_out.getvalue(), 'SET VARIABLE FOO BAR\n')
-            self.assertTrue(res)
+    def setUp(self):
+        """Run before each method to initialize test environment."""
+        super(TestCase, self).setUp()
+        self.agi = AGI()

@@ -15,15 +15,10 @@
 
 from cStringIO import StringIO
 from mock import patch
-from sarlacc import test
-from sarlacc.asterisk.agi import AGI
+from sarlacc.tests.asterisk.agi import test
 
 
 class TestCase(test.TestCase):
-
-    def setUp(self):
-        super(TestCase, self).setUp()
-        self.agi = AGI()
 
     def test_hangup_failure(self):
         with patch('sys.stdin', StringIO("200 result=-1")
@@ -45,7 +40,7 @@ class TestCase(test.TestCase):
         with patch('sys.stdin', StringIO("200 result=1")
                    ), patch('sys.stdout',
                             new_callable=StringIO) as mocked_out:
-            res = self.agi.hangup('Local/1@public-03f5;1')
+            res = self.agi.hangup(channel='Local/1@public-03f5;1')
             self.assertEqual(
                 mocked_out.getvalue(), 'HANGUP Local/1@public-03f5;1\n'
             )

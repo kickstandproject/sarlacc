@@ -15,21 +15,16 @@
 
 from cStringIO import StringIO
 from mock import patch
-from sarlacc import test
-from sarlacc.asterisk.agi import AGI
+from sarlacc.tests.asterisk.agi import test
 
 
 class TestCase(test.TestCase):
-
-    def setUp(self):
-        super(TestCase, self).setUp()
-        self.agi = AGI()
 
     def test_verbose_success(self):
         with patch('sys.stdin', StringIO("200 result=1")
                    ), patch('sys.stdout',
                             new_callable=StringIO) as mocked_out:
-            res = self.agi.verbose(1, "Hello world!")
+            res = self.agi.verbose(level=1, message="Hello world!")
             self.assertEqual(
                 mocked_out.getvalue(), 'VERBOSE "Hello world!" 1\n'
             )
