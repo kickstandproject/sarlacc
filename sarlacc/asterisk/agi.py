@@ -150,14 +150,11 @@ class AGI(object):
             str
 
         :returns:
-            Failure: False
-            Success: True
+            True
         """
         cmd = 'SET VARIABLE %s %s' % (name, value)
-        res = agi_send(cmd)[1]
+        agi_send(cmd)
 
-        if res != '1':
-            return False
         return True
 
     def stream_file(self, name, digits="", offset="0"):
@@ -221,12 +218,9 @@ class AGI(object):
             str
 
         :returns:
-            Failure: False
-            Success: True
+            True
         """
         cmd = 'VERBOSE "%s" %s' % (message, level)
-        res = agi_send(cmd)[1]
+        agi_send(cmd)
 
-        if res != '1':
-            return False
         return True
