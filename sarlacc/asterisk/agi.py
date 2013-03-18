@@ -77,6 +77,57 @@ class AGI(object):
 
         return result, res
 
+    def control_stream_file(
+            self, filename, digits='', skipms='', forward='*', rewind='#',
+            pause=''):
+        """
+        Plays the audio file to the current channel.
+
+        :param filename:
+            Filename to play.  The extension must not be included in the
+            filename.
+
+        :type filename:
+            str
+
+        :param digits:
+            Digits to interrupt audio stream.
+
+        :type digits:
+            str
+
+        :param skipms:
+
+        :type skipms:
+            str
+
+        :param forward:
+
+        :type forward:
+            str
+
+        :param rewind:
+
+        :type rewind:
+            str
+
+        :param pause:
+
+        :type pause:
+            str
+
+        :returns:
+            bool, string
+        """
+        cmd = 'CONTROL STREAM FILE %s "%s" "%s" "%s" "%s" "%s"' % (filename,
+                                                                   digits,
+                                                                   skipms,
+                                                                   forward,
+                                                                   rewind,
+                                                                   pause)
+
+        return self._parse_digit_response(cmd)
+
     def database_del(self, family, key):
         """
         Remove database key / value.
@@ -178,6 +229,34 @@ class AGI(object):
             return False
         return True
 
+    def execute(self, application, options=''):
+        """
+        Execute a given application.
+
+        :param application:
+            Name of the Asterisk application.
+
+        :type application:
+            str
+
+        :param options:
+            A comma delimited string of your applications options.
+
+        :type options:
+            str
+
+        :returns:
+            bool, string
+        """
+        cmd = 'EXEC %s' % application
+        if options != '':
+            cmd += ' %s' % options
+
+        res = agi_send(cmd)[1]
+        if res == '-2':
+            return False, ''
+        return True, res
+
     def get_data(self, filename, digits, timeout='0'):
         """
         Plays the audio file to the current channel.
@@ -204,8 +283,7 @@ class AGI(object):
             str
 
         :returns:
-            Failure: False
-            Success: True
+            bool, string, string
         """
         ret_timeout = False
         result = True
@@ -222,6 +300,33 @@ class AGI(object):
             ret_timeout = True
 
         return result, dtmf, ret_timeout
+
+    def get_full_variable(self, name, channel=''):
+        """
+        Evaluates a channel expression.
+
+        :param name:
+            Variable name.
+
+        :type name:
+            str
+
+        :param channel:
+
+        :type options:
+            str
+
+        :returns:
+            bool, string
+        """
+        cmd = 'GET FULL VARIABLE %s' % name
+        if channel != '':
+            cmd += ' %s' % channel
+
+        res, args = agi_send(cmd)[1:]
+        if res != '1':
+            return False, ''
+        return True, args[1:-1]
 
     def get_option(self, filename, digits='', timeout='0'):
         """
@@ -248,8 +353,7 @@ class AGI(object):
             str
 
         :returns:
-            Failure: False
-            Success: True
+            bool, string
         """
         cmd = 'GET OPTION %s "%s" %s' % (filename, digits, timeout)
 
@@ -266,8 +370,7 @@ class AGI(object):
             str
 
         :returns:
-            Failure: False, ''
-            Success: True, Value
+            bool, string
         """
         cmd = 'GET VARIABLE %s' % name
         res, args = agi_send(cmd)[1:]
@@ -288,8 +391,7 @@ class AGI(object):
             str
 
         :returns:
-            Failure: False
-            Success: True
+            bool
         """
         cmd = 'HANGUP'
         if channel is not None:
@@ -307,7 +409,7 @@ class AGI(object):
         This function does nothing.
 
         :returns:
-            True
+            bool
         """
         cmd = 'NOOP'
         agi_send(cmd)
@@ -415,6 +517,42 @@ class AGI(object):
         cmd = 'SAY PHONETIC %s "%s"' % (string, digits)
 
         return self._parse_digit_response(cmd)
+
+    def send_image(self, filename):
+        """
+        Sends images to channels supporting it.
+
+        :param filename:
+
+        :type filename:
+            str
+
+        :returns:
+            bool
+        """
+        cmd = 'SEND IMAGE %s' % filename
+        res = agi_send(cmd)[1]
+        if res != '0':
+            return False
+        return True
+
+    def send_text(self, message):
+        """
+        Sends text to channels supporting it.
+
+        :param message:
+
+        :type message:
+            str
+
+        :returns:
+            bool
+        """
+        cmd = 'SEND TEXT "%s"' % message
+        res = agi_send(cmd)[1]
+        if res != '0':
+            return False
+        return True
 
     def set_auto_hangup(self, time):
         """
@@ -546,7 +684,7 @@ class AGI(object):
             str
 
         :returns:
-            True
+            bool
         """
         cmd = 'SET VARIABLE %s %s' % (name, value)
         agi_send(cmd)
@@ -578,12 +716,29 @@ class AGI(object):
             str
 
         :returns:
-            Failure: False
-            Success: True
+            bool
         """
         cmd = 'STREAM FILE %s "%s" %s' % (filename, digits, offset)
 
         return self._parse_get_option_or_stream_file(cmd)
+
+    def tdd_mode(self, string):
+        """
+        Toggles telecommunications device for the deaf support.
+
+        :param string:
+
+        :type string:
+            str
+
+        :returns:
+            bool
+        """
+        cmd = 'TDD MODE %s' % string
+        res = agi_send(cmd)[1]
+        if res != '1':
+            return False
+        return True
 
     def verbose(self, level, message):
         """
@@ -602,7 +757,7 @@ class AGI(object):
             str
 
         :returns:
-            True
+            bool
         """
         cmd = 'VERBOSE "%s" %s' % (message, level)
         agi_send(cmd)
