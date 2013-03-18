@@ -34,12 +34,147 @@ class AGI(object):
         Answers the channel.
 
         :returns:
-            Failure: False
-            Success: True
+            bool
         """
         cmd = 'ANSWER'
         res = agi_send(cmd)[1]
         if res != '0':
+            return False
+        return True
+
+    def asyncagi_break(self):
+        """
+        Interrupt Async AGI.
+
+        :returns:
+            bool
+        """
+
+        cmd = 'ASYNCAGI BREAK'
+        agi_send(cmd)
+
+        return True
+
+    def channel_status(self, name):
+        """
+        Returns the status of the connected channel.
+
+        :param name:
+
+        :type name:
+            str
+
+        :returns:
+            bool, string
+        """
+        result = True
+
+        cmd = 'CHANNEL STATUS %s' % (name)
+        res = agi_send(cmd)[1]
+
+        if res == '-1':
+            result = False
+
+        return result, res
+
+    def database_del(self, family, key):
+        """
+        Remove database key / value.
+
+        :param family:
+
+        :type family:
+            str
+
+        :param key:
+
+        :type key:
+            str
+
+        :returns:
+            bool
+        """
+        cmd = 'DATABASE DEL %s %s' % (family, key)
+        res = agi_send(cmd)[1]
+        if res != '1':
+            return False
+        return True
+
+    def database_deltree(self, family, keytree):
+        """
+        Remove database keytree / value.
+
+        :param family:
+
+        :type family:
+            str
+
+        :param keytree:
+
+        :type keytree:
+            str
+
+        :returns:
+            bool
+        """
+        cmd = 'DATABASE DELTREE %s %s' % (family, keytree)
+        res = agi_send(cmd)[1]
+        if res != '1':
+            return False
+        return True
+
+    def database_get(self, family, key):
+        """
+        Get database value.
+
+        :param family:
+
+        :type family:
+            str
+
+        :param key:
+
+        :type key:
+            str
+
+        :returns:
+            bool
+        """
+        result = True
+
+        cmd = 'DATABASE GET %s %s' % (family, key)
+        res, args = agi_send(cmd)[1:]
+
+        if res != '1':
+            result = False
+
+        return result, args[1:-1]
+
+    def database_put(self, family, key, value):
+        """
+        Adds / updates database value.
+
+        :param family:
+
+        :type family:
+            str
+
+        :param key:
+
+        :type key:
+            str
+
+        :param value:
+
+        :type value:
+            str
+
+        :returns:
+            bool
+        """
+        cmd = 'DATABASE PUT %s %s %s' % (family, key, value)
+        res = agi_send(cmd)[1]
+        if res != '1':
             return False
         return True
 
