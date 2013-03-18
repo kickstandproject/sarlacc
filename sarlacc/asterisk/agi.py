@@ -416,6 +416,121 @@ class AGI(object):
 
         return self._parse_digit_response(cmd)
 
+    def set_auto_hangup(self, time):
+        """
+        Hangup the current channel some time in the future.
+
+        :param time:
+            Amount of seconds in the future.
+
+        :type time:
+            str
+
+        :returns:
+            bool
+        """
+        cmd = 'SET AUTOHANGUP %s' % (time)
+        agi_send(cmd)
+
+        return True
+
+    def set_caller_id(self, number):
+        """
+        Sets caller id for the current channel.
+
+        :param number:
+
+        :type number:
+            str
+
+        :returns:
+            bool
+        """
+        cmd = 'SET CALLERID %s' % number
+        agi_send(cmd)
+
+        return True
+
+    def set_context(self, string):
+        """
+        Sets dialplan context.
+
+        :param string:
+
+        :type string:
+            str
+
+        :returns:
+            bool
+        """
+        cmd = 'SET CONTEXT %s' % string
+        agi_send(cmd)
+
+        return True
+
+    def set_extension(self, string):
+        """
+        Sets dialplan extension.
+
+        :param string:
+
+        :type string:
+            str
+
+        :returns:
+            bool
+        """
+        cmd = 'SET EXTENSION %s' % string
+        agi_send(cmd)
+
+        return True
+
+    def set_music(self, enable=True, string=''):
+        """
+        Enable / disable music on hold generator.
+
+        :param enable:
+
+        :type enable:
+            bool
+
+        :param string:
+
+        :type string:
+            str
+
+        :returns:
+            bool
+        """
+        tmp = 'on'
+
+        if not enable:
+            tmp = 'off'
+        cmd = 'SET MUSIC %s' % tmp
+
+        if string != '':
+            cmd += ' %s' % string
+        agi_send(cmd)
+
+        return True
+
+    def set_priority(self, string):
+        """
+        Sets dialplan priority.
+
+        :param string:
+
+        :type string:
+            str
+
+        :returns:
+            bool
+        """
+        cmd = 'SET PRIORITY %s' % string
+        agi_send(cmd)
+
+        return True
+
     def set_variable(self, name, value):
         """
         Set channel variable.
