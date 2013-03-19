@@ -191,15 +191,13 @@ class AGI(object):
         :returns:
             bool
         """
-        result = True
-
         cmd = 'DATABASE GET %s %s' % (family, key)
         res, args = agi_send(cmd)[1:]
 
         if res != '1':
-            result = False
+            return False, ''
 
-        return result, args[1:-1]
+        return True, args[1:-1]
 
     def database_put(self, family, key, value):
         """
@@ -285,21 +283,9 @@ class AGI(object):
         :returns:
             bool, string, string
         """
-        ret_timeout = False
-        result = True
-
         cmd = 'GET DATA %s %s %s' % (filename, timeout, digits)
-        res, args = agi_send(cmd)[1:]
-        dtmf = res
 
-        if res == '-1':
-            dtmf = ''
-            result = False
-
-        if args[1:-1] == 'timeout':
-            ret_timeout = True
-
-        return result, dtmf, ret_timeout
+        return self._parse_timeout_response(cmd)
 
     def get_full_variable(self, name, channel=''):
         """
@@ -326,6 +312,7 @@ class AGI(object):
         res, args = agi_send(cmd)[1:]
         if res != '1':
             return False, ''
+
         return True, args[1:-1]
 
     def get_option(self, filename, digits='', timeout='0'):
@@ -377,6 +364,7 @@ class AGI(object):
 
         if res != '1':
             return False, ''
+
         return True, args[1:-1]
 
     def hangup(self, channel=None):
@@ -400,6 +388,7 @@ class AGI(object):
 
         if res != '1':
             return False
+
         return True
 
     def noop(self):
@@ -415,6 +404,44 @@ class AGI(object):
         agi_send(cmd)
 
         return True
+
+    def receive_char(self, timeout):
+        """
+        Receive one character from channels support it.
+
+        :param timeout:
+            The amount of time, in milliseconds, to wait for DTMF.
+
+        :type timeout:
+            str
+
+        :returns:
+            bool, str, str
+        """
+        cmd = 'RECEIVE CHAR %s' % timeout
+
+        return self._parse_timeout_response(cmd)
+
+    def receive_text(self, timeout):
+        """
+        Receives text from channels supporting it.
+
+        :param timeout:
+            The amount of time, in milliseconds, to wait for DTMF.
+
+        :type timeout:
+            str
+
+        :returns:
+            bool, str
+        """
+        cmd = 'RECEIVE TEXT %s' % timeout
+        res, args = agi_send(cmd)[1:]
+
+        if res != '1':
+            return False, ''
+
+        return True, args[1:-1]
 
     def say_alpha(self, string, digits=''):
         """
@@ -432,10 +459,33 @@ class AGI(object):
             str
 
         :returns:
-            bool, string
+            bool, str
 
         """
         cmd = 'SAY ALPHA %s "%s"' % (string, digits)
+
+        return self._parse_digit_response(cmd)
+
+    def say_date(self, epoch, digits=''):
+        """
+        Say a given date.
+
+        :param epoch:
+
+        :type epoch:
+            str
+
+        :param digits:
+            Digits to interrupt audio stream.
+
+        :type digits:
+            str
+
+        :returns:
+            bool, str
+
+        """
+        cmd = 'SAY DATE %s "%s"' % (epoch, digits)
 
         return self._parse_digit_response(cmd)
 
@@ -455,7 +505,7 @@ class AGI(object):
             str
 
         :returns:
-            bool, string
+            bool, str
 
         """
         cmd = 'SAY DIGITS %s "%s"' % (string, digits)
@@ -484,7 +534,7 @@ class AGI(object):
             str
 
         :returns:
-            bool, string
+            bool, str
 
         """
         cmd = 'SAY NUMBER %s "%s"' % (string, digits)
@@ -511,10 +561,33 @@ class AGI(object):
             str
 
         :returns:
-            bool, string
+            bool, str
 
         """
         cmd = 'SAY PHONETIC %s "%s"' % (string, digits)
+
+        return self._parse_digit_response(cmd)
+
+    def say_time(self, epoch, digits=''):
+        """
+        Say a given time.
+
+        :param epoch:
+
+        :type epoch:
+            str
+
+        :param digits:
+            Digits to interrupt audio stream.
+
+        :type digits:
+            str
+
+        :returns:
+            bool, str
+
+        """
+        cmd = 'SAY TIME %s "%s"' % (epoch, digits)
 
         return self._parse_digit_response(cmd)
 
@@ -722,6 +795,144 @@ class AGI(object):
 
         return self._parse_get_option_or_stream_file(cmd)
 
+    def speech_activate_grammar(self, name):
+        """
+        Activates a grammar.
+
+        :param name:
+
+        :type name:
+            str
+
+        :returns:
+            bool
+        """
+        cmd = 'SPEECH ACTIVATE GRAMMAR %s' % name
+        res = agi_send(cmd)[1]
+        if res != '1':
+            return False
+
+        return True
+
+    def speech_create(self, engine):
+        """
+        Creates a speech object.
+
+        :param engine:
+
+        :type engine:
+            str
+
+        :returns:
+            bool
+        """
+        cmd = 'SPEECH CREATE %s' % engine
+        res = agi_send(cmd)[1]
+        if res != '1':
+            return False
+
+        return True
+
+    def speech_deactivate_grammar(self, name):
+        """
+        Deactivates a grammar.
+
+        :param name:
+
+        :type name:
+            str
+
+        :returns:
+            bool
+        """
+        cmd = 'SPEECH DEACTIVATE GRAMMAR %s' % name
+        res = agi_send(cmd)[1]
+        if res != '1':
+            return False
+
+        return True
+
+    def speech_destroy(self):
+        """
+        Destroys a speech object.
+
+        :returns:
+            bool
+        """
+        cmd = 'SPEECH DESTROY'
+        res = agi_send(cmd)[1]
+        if res != '1':
+            return False
+
+        return True
+
+    def speech_load_grammar(self, name, path):
+        """
+        Loads a grammar.
+
+        :param name:
+
+        :type name:
+            str
+
+        :param path:
+
+        :type path:
+            str
+
+        :returns:
+            bool
+        """
+        cmd = 'SPEECH LOAD GRAMMAR %s %s' % (name, path)
+        res = agi_send(cmd)[1]
+        if res != '1':
+            return False
+
+        return True
+
+    def speech_set(self, name, value):
+        """
+        Sets a speech engine setting.
+
+        :param name:
+
+        :type name:
+            str
+
+        :param value:
+
+        :type value:
+            str
+
+        :returns:
+            bool
+        """
+        cmd = 'SPEECH SET %s %s' % (name, value)
+        res = agi_send(cmd)[1]
+        if res != '1':
+            return False
+
+        return True
+
+    def speech_unload_grammar(self, name):
+        """
+        Loads a grammar.
+
+        :param name:
+
+        :type name:
+            str
+
+        :returns:
+            bool
+        """
+        cmd = 'SPEECH UNLOAD GRAMMAR %s' % name
+        res = agi_send(cmd)[1]
+        if res != '1':
+            return False
+
+        return True
+
     def tdd_mode(self, string):
         """
         Toggles telecommunications device for the deaf support.
@@ -810,3 +1021,19 @@ class AGI(object):
             dtmf = chr(int(res))
 
         return result, dtmf, endpos
+
+    def _parse_timeout_response(self, cmd):
+        ret_timeout = False
+        result = True
+
+        res, args = agi_send(cmd)[1:]
+        dtmf = res
+
+        if res == '-1':
+            dtmf = ''
+            result = False
+
+        if args[1:-1] == 'timeout':
+            ret_timeout = True
+
+        return result, dtmf, ret_timeout
