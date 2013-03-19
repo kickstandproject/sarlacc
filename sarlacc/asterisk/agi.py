@@ -443,6 +443,82 @@ class AGI(object):
 
         return True, args[1:-1]
 
+    def record_file(
+            self, filename, fmt='', digits='', timeout='', offset='',
+            beep=True, silence=''):
+        """
+        Plays the audio file to the current channel.
+
+        :param filename:
+            Filename to play.  The extension must not be included in the
+            filename.
+
+        :type filename:
+            str
+
+        :param fmt:
+
+        :type fmt:
+            str
+
+        :param digits:
+            Digits to interrupt audio stream.
+
+        :type digits:
+            str
+
+        :param timeout:
+
+        :type timeout:
+            str
+
+        :param offset:
+
+        :type offset:
+            str
+
+        :param beep:
+
+        :type beep:
+            bool
+
+        :param beep:
+
+        :type beep:
+            bool
+
+        :returns:
+            bool, string
+        """
+        result = True
+        dtmf = ''
+        endpos = ''
+
+        cmd = 'RECORD FILE %s "%s" "%s" "%s"' % (filename, fmt, digits,
+                                                 timeout)
+        if offset != '':
+            cmd += ' "%s"' % offset
+        if beep:
+            cmd += ' BEEP'
+        if silence != '':
+            cmd += ' s=%s' % silence
+
+        res, args = agi_send(cmd)[1:]
+        resp = args
+
+        if ' ' in args:
+            resp, endpos = args.split(' ')
+            endpos = endpos.replace('endpos=', '')
+
+        if res == '-1':
+            result = False
+        elif res == '0' and endpos == '0':
+            result = False
+        if res > '0':
+            dtmf = chr(int(res))
+
+        return result, resp[1:-1], endpos, dtmf
+
     def say_alpha(self, string, digits=''):
         """
         Say a given character string.
@@ -486,6 +562,40 @@ class AGI(object):
 
         """
         cmd = 'SAY DATE %s "%s"' % (epoch, digits)
+
+        return self._parse_digit_response(cmd)
+
+    def say_datetime(self, epoch, digits='', fmt='', timezone=''):
+        """
+        Say a given time as specified by the format given.
+
+        :param epoch:
+
+        :type epoch:
+            str
+
+        :param digits:
+            Digits to interrupt audio stream.
+
+        :type digits:
+            str
+
+        :param fmt:
+
+        :type fmt:
+            str
+
+        :param timezone:
+
+        :type timezone:
+            str
+
+        :returns:
+            bool, str
+
+        """
+        cmd = 'SAY DATETIME %s "%s" "%s" "%s"' % (epoch, digits, fmt,
+                                                  timezone)
 
         return self._parse_digit_response(cmd)
 
