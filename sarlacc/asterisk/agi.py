@@ -447,16 +447,17 @@ class AGI(object):
             self, filename, fmt='', digits='', timeout='', offset='',
             beep=True, silence=''):
         """
-        Plays the audio file to the current channel.
+        Records audio from the channel.
 
         :param filename:
-            Filename to play.  The extension must not be included in the
-            filename.
+            The name of the file to record too. The extension must not be
+            included.
 
         :type filename:
             str
 
         :param fmt:
+            Format of the file recording.
 
         :type fmt:
             str
@@ -476,11 +477,6 @@ class AGI(object):
 
         :type offset:
             str
-
-        :param beep:
-
-        :type beep:
-            bool
 
         :param beep:
 
