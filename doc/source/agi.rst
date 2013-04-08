@@ -3,7 +3,7 @@
 AGI
 ===
 
-.. automodule:: agi
+.. automodule:: sarlacc.asterisk.client
 
 .. autoclass:: AGI
    :members:

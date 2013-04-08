@@ -13,7 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 # implied.
 
-from sarlacc.asterisk.agi import AGI
+from sarlacc.asterisk.client import AGI
 from sarlacc import test
 
 
