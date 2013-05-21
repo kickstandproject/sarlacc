@@ -12,14 +12,3 @@
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 # implied.
-
-"""
-Asterisk AGI
-"""
-
-from sarlacc.asterisk.agi.base import Base
-
-
-class AGI(Base):
-    def __init__(self):
-        Base.__init__(self)
