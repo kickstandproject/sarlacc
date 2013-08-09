@@ -1,5 +1,6 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 
+# Copyright 2012 OpenStack LLC.
 # Copyright (C) 2013 PolyBeacon, Inc.
 #
 # Author: Paul Belanger <paul.belanger@polybeacon.com>
@@ -16,6 +17,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pbr.version
+import os
 
-VERSION_INFO = pbr.version.VersionInfo('sarlacc')
+
+def env(*vars, **kwargs):
+    """Search for the first defined of possibly many env vars
+
+    Returns the first environment variable defined in vars, or
+    returns the default defined in kwargs.
+    """
+    for v in vars:
+        value = os.environ.get(v, None)
+        if value:
+            return value
+    return kwargs.get('default', '')

@@ -37,17 +37,23 @@ latex_elements = {
 }
 
 latex_documents = [
-  ('index', 'Sarlacc.tex', u'Sarlacc Documentation',
-   u'Paul Belanger', 'manual'),
+    (
+        'index', 'Sarlacc.tex', u'Sarlacc Documentation',
+        u'Paul Belanger', 'manual'
+    ),
 ]
 
 man_pages = [
-    ('index', 'Sarlacc', u'Sarlacc Documentation',
-     [u'Paul Belanger'], 1)
+    (
+        'index', 'Sarlacc', u'Sarlacc Documentation',
+        [u'Paul Belanger'], 1
+    ),
 ]
 
 texinfo_documents = [
-  ('index', 'Sarlacc', u'Sarlacc Documentation',
-   u'Paul Belanger', 'Sarlacc', 'One line description of project.',
-   'Miscellaneous'),
+    (
+        'index', 'Sarlacc', u'Sarlacc Documentation',
+        u'Paul Belanger', 'Sarlacc', 'One line description of project.',
+        'Miscellaneous'
+    ),
 ]

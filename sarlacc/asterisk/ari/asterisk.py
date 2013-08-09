@@ -16,6 +16,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pbr.version
 
-VERSION_INFO = pbr.version.VersionInfo('sarlacc')
+class Controller(object):
+
+    url = '/asterisk'
+
+    def __init__(self, http_client, model):
+        self.http_client = http_client
+        self.model = model
+
+    def info(self):
+        url = '%s/%s' % (self.url, 'info')
+        resp, body = self.http_client.json_request('GET', url)
+
+        return body

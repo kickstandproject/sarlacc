@@ -16,6 +16,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pbr.version
+from sarlacc.asterisk.ari import asterisk
+from sarlacc.common import http
 
-VERSION_INFO = pbr.version.VersionInfo('sarlacc')
+
+class Client(object):
+
+    def __init__(self, *args, **kwargs):
+        self.http_client = http.HTTPClient(*args, **kwargs)
+        self.asterisk = asterisk.Controller(
+            self.http_client, None
+        )
