@@ -15,25 +15,7 @@
 
 import setuptools
 
-from sarlacc.openstack.common import setup
-from sarlacc.version import SARLACC_VERSION as version
-
-
-requires = setup.parse_requirements()
-test_requires = setup.parse_requirements(['tools/test-requires'])
-depend_links = setup.parse_dependency_links()
-
 setuptools.setup(
-    name='sarlacc',
-    version=version.canonical_version_string(always=True),
-    author='Paul Belanger',
-    author_email='paul.belanger@polybeacon.com',
-    url='https://github.com/kickstandproject/sarlacc',
-    cmdclass=setup.get_cmdclass(),
-    packages=setuptools.find_packages(),
-    install_requires=requires,
-    dependency_links=depend_links,
-    include_package_data=True,
-    test_suite='nose.collector',
-    setup_requires=['setuptools_git>=0.4'],
+    setup_requires=['d2to1', 'pbr'],
+    d2to1=True,
 )

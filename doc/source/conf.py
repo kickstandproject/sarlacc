@@ -16,8 +16,6 @@
 import os
 import sys
 
-from sarlacc.version import SARLACC_VERSION as sarlacc_version
-
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
@@ -30,8 +28,6 @@ source_suffix = '.rst'
 master_doc = 'index'
 project = u'Sarlacc'
 copyright = u'2013, Paul Belanger'
-release = sarlacc_version.version_string_with_vcs()
-version = sarlacc_version.canonical_version_string()
 exclude_patterns = []
 pygments_style = 'sphinx'
 html_theme = 'default'
