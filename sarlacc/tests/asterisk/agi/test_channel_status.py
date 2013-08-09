@@ -13,31 +13,32 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 # implied.
 
-from cStringIO import StringIO
-from mock import patch
+import cStringIO
+import mock
+
 from sarlacc.tests.asterisk.agi import test
 
 
 class TestCase(test.TestCase):
 
+    @mock.patch('sys.stdin', cStringIO.StringIO("200 result=-1"))
     def test_channel_status_failure(self):
-        with patch('sys.stdin', StringIO("200 result=-1")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
+        with mock.patch(
+                'sys.stdout', new_callable=cStringIO.StringIO) as mock_stdout:
             res, status = self.agi.channel_status(name='Local/foo')
             self.assertEqual(
-                mocked_out.getvalue(), 'CHANNEL STATUS Local/foo\n'
+                mock_stdout.getvalue(), 'CHANNEL STATUS Local/foo\n'
             )
             self.assertFalse(res)
             self.assertEqual(status, '-1')
 
+    @mock.patch('sys.stdin', cStringIO.StringIO("200 result=5"))
     def test_channel_status_success(self):
-        with patch('sys.stdin', StringIO("200 result=5")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
+        with mock.patch(
+                'sys.stdout', new_callable=cStringIO.StringIO) as mock_stdout:
             res, status = self.agi.channel_status(name='SIP/demo/123')
             self.assertEqual(
-                mocked_out.getvalue(), 'CHANNEL STATUS SIP/demo/123\n'
+                mock_stdout.getvalue(), 'CHANNEL STATUS SIP/demo/123\n'
             )
             self.assertTrue(res)
             self.assertEqual(status, '5')

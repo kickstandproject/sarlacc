@@ -13,19 +13,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 # implied.
 
-from cStringIO import StringIO
-from mock import patch
+import cStringIO
+import mock
+
 from sarlacc.tests.asterisk.agi import test
 
 
 class TestCase(test.TestCase):
 
+    @mock.patch('sys.stdin', cStringIO.StringIO("200 result=1"))
     def test_verbose_success(self):
-        with patch('sys.stdin', StringIO("200 result=1")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
+        with mock.patch(
+                'sys.stdout', new_callable=cStringIO.StringIO) as mock_stdout:
             res = self.agi.verbose(level=1, message="Hello world!")
             self.assertEqual(
-                mocked_out.getvalue(), 'VERBOSE "Hello world!" 1\n'
+                mock_stdout.getvalue(), 'VERBOSE "Hello world!" 1\n'
             )
             self.assertTrue(res)

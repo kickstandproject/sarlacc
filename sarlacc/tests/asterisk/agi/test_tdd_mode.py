@@ -13,25 +13,26 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 # implied.
 
-from cStringIO import StringIO
-from mock import patch
+import cStringIO
+import mock
+
 from sarlacc.tests.asterisk.agi import test
 
 
 class TestCase(test.TestCase):
 
+    @mock.patch('sys.stdin', cStringIO.StringIO("200 result=0"))
     def test_tdd_mode_failure(self):
-        with patch('sys.stdin', StringIO("200 result=0")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
+        with mock.patch(
+                'sys.stdout', new_callable=cStringIO.StringIO) as mock_stdout:
             res = self.agi.tdd_mode(string='off')
-            self.assertEqual(mocked_out.getvalue(), 'TDD MODE off\n')
+            self.assertEqual(mock_stdout.getvalue(), 'TDD MODE off\n')
             self.assertFalse(res)
 
+    @mock.patch('sys.stdin', cStringIO.StringIO("200 result=1"))
     def test_tdd_mode_success(self):
-        with patch('sys.stdin', StringIO("200 result=1")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
+        with mock.patch(
+                'sys.stdout', new_callable=cStringIO.StringIO) as mock_stdout:
             res = self.agi.tdd_mode(string='on')
-            self.assertEqual(mocked_out.getvalue(), 'TDD MODE on\n')
+            self.assertEqual(mock_stdout.getvalue(), 'TDD MODE on\n')
             self.assertTrue(res)

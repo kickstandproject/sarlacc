@@ -13,33 +13,34 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 # implied.
 
-from cStringIO import StringIO
-from mock import patch
+import cStringIO
+import mock
+
 from sarlacc.tests.asterisk.agi import test
 
 
 class TestCase(test.TestCase):
 
+    @mock.patch('sys.stdin', cStringIO.StringIO("200 result=0"))
     def test_set_music_on_success(self):
-        with patch('sys.stdin', StringIO("200 result=0")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
+        with mock.patch(
+                'sys.stdout', new_callable=cStringIO.StringIO) as mock_stdout:
             res = self.agi.set_music()
-            self.assertEqual(mocked_out.getvalue(), 'SET MUSIC on\n')
+            self.assertEqual(mock_stdout.getvalue(), 'SET MUSIC on\n')
             self.assertTrue(res)
 
+    @mock.patch('sys.stdin', cStringIO.StringIO("200 result=0"))
     def test_set_music_on_with_class_success(self):
-        with patch('sys.stdin', StringIO("200 result=0")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
+        with mock.patch(
+                'sys.stdout', new_callable=cStringIO.StringIO) as mock_stdout:
             res = self.agi.set_music(string='ringback')
-            self.assertEqual(mocked_out.getvalue(), 'SET MUSIC on ringback\n')
+            self.assertEqual(mock_stdout.getvalue(), 'SET MUSIC on ringback\n')
             self.assertTrue(res)
 
+    @mock.patch('sys.stdin', cStringIO.StringIO("200 result=0"))
     def test_set_music_off_success(self):
-        with patch('sys.stdin', StringIO("200 result=0")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
+        with mock.patch(
+                'sys.stdout', new_callable=cStringIO.StringIO) as mock_stdout:
             res = self.agi.set_music(enable=False)
-            self.assertEqual(mocked_out.getvalue(), 'SET MUSIC off\n')
+            self.assertEqual(mock_stdout.getvalue(), 'SET MUSIC off\n')
             self.assertTrue(res)

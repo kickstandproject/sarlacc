@@ -18,7 +18,8 @@ Asterisk AGI
 """
 
 import logging
-from sarlacc.utils import agi_send, agi_setup_env
+
+from sarlacc import utils
 
 LOG = logging.getLogger(__name__)
 
@@ -27,37 +28,34 @@ class Base(object):
     env = {}
 
     def __init__(self):
-        self.env = agi_setup_env()
+        self.env = utils.agi_setup_env()
 
     def answer(self):
-        """
-        Answers the channel.
+        """Answers the channel.
 
         :returns:
             bool
         """
         cmd = 'ANSWER'
-        res = agi_send(cmd)[1]
+        res = utils.agi_send(cmd)[1]
         if res != '0':
             return False
         return True
 
     def asyncagi_break(self):
-        """
-        Interrupt Async AGI.
+        """Interrupt Async AGI.
 
         :returns:
             bool
         """
 
         cmd = 'ASYNCAGI BREAK'
-        agi_send(cmd)
+        utils.agi_send(cmd)
 
         return True
 
     def channel_status(self, name):
-        """
-        Returns the status of the connected channel.
+        """Returns the status of the connected channel.
 
         :param name:
 
@@ -70,7 +68,7 @@ class Base(object):
         result = True
 
         cmd = 'CHANNEL STATUS %s' % (name)
-        res = agi_send(cmd)[1]
+        res = utils.agi_send(cmd)[1]
 
         if res == '-1':
             result = False
@@ -80,8 +78,7 @@ class Base(object):
     def control_stream_file(
             self, filename, digits='', skipms='', forward='*', rewind='#',
             pause=''):
-        """
-        Plays the audio file to the current channel.
+        """Plays the audio file to the current channel.
 
         :param filename:
             Filename to play.  The extension must not be included in the
@@ -129,8 +126,7 @@ class Base(object):
         return self._parse_digit_response(cmd)
 
     def database_del(self, family, key):
-        """
-        Remove database key / value.
+        """Remove database key / value.
 
         :param family:
 
@@ -146,14 +142,13 @@ class Base(object):
             bool
         """
         cmd = 'DATABASE DEL %s %s' % (family, key)
-        res = agi_send(cmd)[1]
+        res = utils.agi_send(cmd)[1]
         if res != '1':
             return False
         return True
 
     def database_deltree(self, family, keytree):
-        """
-        Remove database keytree / value.
+        """Remove database keytree / value.
 
         :param family:
 
@@ -169,14 +164,13 @@ class Base(object):
             bool
         """
         cmd = 'DATABASE DELTREE %s %s' % (family, keytree)
-        res = agi_send(cmd)[1]
+        res = utils.agi_send(cmd)[1]
         if res != '1':
             return False
         return True
 
     def database_get(self, family, key):
-        """
-        Get database value.
+        """Get database value.
 
         :param family:
 
@@ -192,7 +186,7 @@ class Base(object):
             bool
         """
         cmd = 'DATABASE GET %s %s' % (family, key)
-        res, args = agi_send(cmd)[1:]
+        res, args = utils.agi_send(cmd)[1:]
 
         if res != '1':
             return False, ''
@@ -200,8 +194,7 @@ class Base(object):
         return True, args[1:-1]
 
     def database_put(self, family, key, value):
-        """
-        Adds / updates database value.
+        """Adds / updates database value.
 
         :param family:
 
@@ -222,14 +215,13 @@ class Base(object):
             bool
         """
         cmd = 'DATABASE PUT %s %s %s' % (family, key, value)
-        res = agi_send(cmd)[1]
+        res = utils.agi_send(cmd)[1]
         if res != '1':
             return False
         return True
 
     def execute(self, application, options=''):
-        """
-        Execute a given application.
+        """Execute a given application.
 
         :param application:
             Name of the Asterisk application.
@@ -250,14 +242,13 @@ class Base(object):
         if options != '':
             cmd += ' %s' % options
 
-        res = agi_send(cmd)[1]
+        res = utils.agi_send(cmd)[1]
         if res == '-2':
             return False, ''
         return True, res
 
     def get_data(self, filename, digits, timeout='0'):
-        """
-        Plays the audio file to the current channel.
+        """Plays the audio file to the current channel.
 
         :param filename:
             Name of the file you wish to be played. The extension must not be
@@ -288,8 +279,7 @@ class Base(object):
         return self._parse_timeout_response(cmd)
 
     def get_full_variable(self, name, channel=''):
-        """
-        Evaluates a channel expression.
+        """Evaluates a channel expression.
 
         :param name:
             Variable name.
@@ -309,15 +299,14 @@ class Base(object):
         if channel != '':
             cmd += ' %s' % channel
 
-        res, args = agi_send(cmd)[1:]
+        res, args = utils.agi_send(cmd)[1:]
         if res != '1':
             return False, ''
 
         return True, args[1:-1]
 
     def get_option(self, filename, digits='', timeout='0'):
-        """
-        Plays the audio file to the current channel.
+        """Plays the audio file to the current channel.
 
         :param filename:
             Filename to play.  The extension must not be included in the
@@ -347,8 +336,7 @@ class Base(object):
         return self._parse_get_option_or_stream_file(cmd)
 
     def get_variable(self, name):
-        """
-        Gets a channel variable.
+        """Gets a channel variable.
 
         :param name:
             Channel name
@@ -360,7 +348,7 @@ class Base(object):
             bool, string
         """
         cmd = 'GET VARIABLE %s' % name
-        res, args = agi_send(cmd)[1:]
+        res, args = utils.agi_send(cmd)[1:]
 
         if res != '1':
             return False, ''
@@ -368,9 +356,8 @@ class Base(object):
         return True, args[1:-1]
 
     def hangup(self, channel=None):
-        """
-        Hangs up the specified channel.  If no channel is given, hangs up the
-        current channel.
+        """Hangs up the specified channel.  If no channel is given, hangs up
+        the current channel.
 
         :param channel:
             Name of the channel to hangup
@@ -384,7 +371,7 @@ class Base(object):
         cmd = 'HANGUP'
         if channel is not None:
             cmd += ' %s' % channel
-        res = agi_send(cmd)[1]
+        res = utils.agi_send(cmd)[1]
 
         if res != '1':
             return False
@@ -392,8 +379,7 @@ class Base(object):
         return True
 
     def noop(self):
-        """
-        Do nothing.
+        """Do nothing.
 
         This function does nothing.
 
@@ -401,13 +387,12 @@ class Base(object):
             bool
         """
         cmd = 'NOOP'
-        agi_send(cmd)
+        utils.agi_send(cmd)
 
         return True
 
     def receive_char(self, timeout):
-        """
-        Receive one character from channels support it.
+        """Receive one character from channels support it.
 
         :param timeout:
             The amount of time, in milliseconds, to wait for DTMF.
@@ -423,8 +408,7 @@ class Base(object):
         return self._parse_timeout_response(cmd)
 
     def receive_text(self, timeout):
-        """
-        Receives text from channels supporting it.
+        """Receives text from channels supporting it.
 
         :param timeout:
             The amount of time, in milliseconds, to wait for DTMF.
@@ -436,7 +420,7 @@ class Base(object):
             bool, str
         """
         cmd = 'RECEIVE TEXT %s' % timeout
-        res, args = agi_send(cmd)[1:]
+        res, args = utils.agi_send(cmd)[1:]
 
         if res != '1':
             return False, ''
@@ -446,8 +430,7 @@ class Base(object):
     def record_file(
             self, filename, fmt='', digits='', timeout='', offset='',
             beep=True, silence=''):
-        """
-        Records audio from the channel.
+        """Records audio from the channel.
 
         :param filename:
             The name of the file to record too. The extension must not be
@@ -499,7 +482,7 @@ class Base(object):
         if silence != '':
             cmd += ' s=%s' % silence
 
-        res, args = agi_send(cmd)[1:]
+        res, args = utils.agi_send(cmd)[1:]
         resp = args
 
         if ' ' in args:
@@ -516,8 +499,7 @@ class Base(object):
         return result, resp[1:-1], endpos, dtmf
 
     def say_alpha(self, string, digits=''):
-        """
-        Say a given character string.
+        """Say a given character string.
 
         :param string:
 
@@ -539,8 +521,7 @@ class Base(object):
         return self._parse_digit_response(cmd)
 
     def say_date(self, epoch, digits=''):
-        """
-        Say a given date.
+        """Say a given date.
 
         :param epoch:
 
@@ -562,8 +543,7 @@ class Base(object):
         return self._parse_digit_response(cmd)
 
     def say_datetime(self, epoch, digits='', fmt='', timezone=''):
-        """
-        Say a given time as specified by the format given.
+        """Say a given time as specified by the format given.
 
         :param epoch:
 
@@ -596,8 +576,7 @@ class Base(object):
         return self._parse_digit_response(cmd)
 
     def say_digits(self, string, digits=''):
-        """
-        Say a given digit string.
+        """Say a given digit string.
 
         :param string:
 
@@ -619,8 +598,7 @@ class Base(object):
         return self._parse_digit_response(cmd)
 
     def say_number(self, string, digits='', gender=None):
-        """
-        Say a given number.
+        """Say a given number.
 
         :param string:
 
@@ -652,8 +630,7 @@ class Base(object):
         return self._parse_digit_response(cmd)
 
     def say_phonetic(self, string, digits=''):
-        """
-        Say a given character string with phonetics.
+        """Say a given character string with phonetics.
 
         :param string:
 
@@ -675,8 +652,7 @@ class Base(object):
         return self._parse_digit_response(cmd)
 
     def say_time(self, epoch, digits=''):
-        """
-        Say a given time.
+        """Say a given time.
 
         :param epoch:
 
@@ -698,8 +674,7 @@ class Base(object):
         return self._parse_digit_response(cmd)
 
     def send_image(self, filename):
-        """
-        Sends images to channels supporting it.
+        """Sends images to channels supporting it.
 
         :param filename:
 
@@ -710,14 +685,13 @@ class Base(object):
             bool
         """
         cmd = 'SEND IMAGE %s' % filename
-        res = agi_send(cmd)[1]
+        res = utils.agi_send(cmd)[1]
         if res != '0':
             return False
         return True
 
     def send_text(self, message):
-        """
-        Sends text to channels supporting it.
+        """Sends text to channels supporting it.
 
         :param message:
 
@@ -728,14 +702,13 @@ class Base(object):
             bool
         """
         cmd = 'SEND TEXT "%s"' % message
-        res = agi_send(cmd)[1]
+        res = utils.agi_send(cmd)[1]
         if res != '0':
             return False
         return True
 
     def set_auto_hangup(self, time):
-        """
-        Hangup the current channel some time in the future.
+        """Hangup the current channel some time in the future.
 
         :param time:
             Amount of seconds in the future.
@@ -747,13 +720,12 @@ class Base(object):
             bool
         """
         cmd = 'SET AUTOHANGUP %s' % (time)
-        agi_send(cmd)
+        utils.agi_send(cmd)
 
         return True
 
     def set_caller_id(self, number):
-        """
-        Sets caller id for the current channel.
+        """Sets caller id for the current channel.
 
         :param number:
 
@@ -764,13 +736,12 @@ class Base(object):
             bool
         """
         cmd = 'SET CALLERID %s' % number
-        agi_send(cmd)
+        utils.agi_send(cmd)
 
         return True
 
     def set_context(self, string):
-        """
-        Sets dialplan context.
+        """Sets dialplan context.
 
         :param string:
 
@@ -781,13 +752,12 @@ class Base(object):
             bool
         """
         cmd = 'SET CONTEXT %s' % string
-        agi_send(cmd)
+        utils.agi_send(cmd)
 
         return True
 
     def set_extension(self, string):
-        """
-        Sets dialplan extension.
+        """Sets dialplan extension.
 
         :param string:
 
@@ -798,13 +768,12 @@ class Base(object):
             bool
         """
         cmd = 'SET EXTENSION %s' % string
-        agi_send(cmd)
+        utils.agi_send(cmd)
 
         return True
 
     def set_music(self, enable=True, string=''):
-        """
-        Enable / disable music on hold generator.
+        """Enable / disable music on hold generator.
 
         :param enable:
 
@@ -827,13 +796,12 @@ class Base(object):
 
         if string != '':
             cmd += ' %s' % string
-        agi_send(cmd)
+        utils.agi_send(cmd)
 
         return True
 
     def set_priority(self, string):
-        """
-        Sets dialplan priority.
+        """Sets dialplan priority.
 
         :param string:
 
@@ -844,13 +812,12 @@ class Base(object):
             bool
         """
         cmd = 'SET PRIORITY %s' % string
-        agi_send(cmd)
+        utils.agi_send(cmd)
 
         return True
 
     def set_variable(self, name, value):
-        """
-        Set channel variable.
+        """Set channel variable.
 
         :param name:
 
@@ -866,13 +833,12 @@ class Base(object):
             bool
         """
         cmd = 'SET VARIABLE %s %s' % (name, value)
-        agi_send(cmd)
+        utils.agi_send(cmd)
 
         return True
 
     def stream_file(self, filename, digits='', offset='0'):
-        """
-        Plays the audio file to the current channel.
+        """Plays the audio file to the current channel.
 
         :param filename:
             Filename to play.  The extension must not be included in the
@@ -902,8 +868,7 @@ class Base(object):
         return self._parse_get_option_or_stream_file(cmd)
 
     def speech_activate_grammar(self, name):
-        """
-        Activates a grammar.
+        """Activates a grammar.
 
         :param name:
 
@@ -914,15 +879,14 @@ class Base(object):
             bool
         """
         cmd = 'SPEECH ACTIVATE GRAMMAR %s' % name
-        res = agi_send(cmd)[1]
+        res = utils.agi_send(cmd)[1]
         if res != '1':
             return False
 
         return True
 
     def speech_create(self, engine):
-        """
-        Creates a speech object.
+        """Creates a speech object.
 
         :param engine:
 
@@ -933,15 +897,14 @@ class Base(object):
             bool
         """
         cmd = 'SPEECH CREATE %s' % engine
-        res = agi_send(cmd)[1]
+        res = utils.agi_send(cmd)[1]
         if res != '1':
             return False
 
         return True
 
     def speech_deactivate_grammar(self, name):
-        """
-        Deactivates a grammar.
+        """Deactivates a grammar.
 
         :param name:
 
@@ -952,29 +915,27 @@ class Base(object):
             bool
         """
         cmd = 'SPEECH DEACTIVATE GRAMMAR %s' % name
-        res = agi_send(cmd)[1]
+        res = utils.agi_send(cmd)[1]
         if res != '1':
             return False
 
         return True
 
     def speech_destroy(self):
-        """
-        Destroys a speech object.
+        """Destroys a speech object.
 
         :returns:
             bool
         """
         cmd = 'SPEECH DESTROY'
-        res = agi_send(cmd)[1]
+        res = utils.agi_send(cmd)[1]
         if res != '1':
             return False
 
         return True
 
     def speech_load_grammar(self, name, path):
-        """
-        Loads a grammar.
+        """Loads a grammar.
 
         :param name:
 
@@ -990,15 +951,14 @@ class Base(object):
             bool
         """
         cmd = 'SPEECH LOAD GRAMMAR %s %s' % (name, path)
-        res = agi_send(cmd)[1]
+        res = utils.agi_send(cmd)[1]
         if res != '1':
             return False
 
         return True
 
     def speech_set(self, name, value):
-        """
-        Sets a speech engine setting.
+        """Sets a speech engine setting.
 
         :param name:
 
@@ -1014,15 +974,14 @@ class Base(object):
             bool
         """
         cmd = 'SPEECH SET %s %s' % (name, value)
-        res = agi_send(cmd)[1]
+        res = utils.agi_send(cmd)[1]
         if res != '1':
             return False
 
         return True
 
     def speech_unload_grammar(self, name):
-        """
-        Loads a grammar.
+        """Loads a grammar.
 
         :param name:
 
@@ -1033,15 +992,14 @@ class Base(object):
             bool
         """
         cmd = 'SPEECH UNLOAD GRAMMAR %s' % name
-        res = agi_send(cmd)[1]
+        res = utils.agi_send(cmd)[1]
         if res != '1':
             return False
 
         return True
 
     def tdd_mode(self, string):
-        """
-        Toggles telecommunications device for the deaf support.
+        """Toggles telecommunications device for the deaf support.
 
         :param string:
 
@@ -1052,14 +1010,13 @@ class Base(object):
             bool
         """
         cmd = 'TDD MODE %s' % string
-        res = agi_send(cmd)[1]
+        res = utils.agi_send(cmd)[1]
         if res != '1':
             return False
         return True
 
     def verbose(self, level, message):
-        """
-        Log a message to the asterisk verbose log.
+        """Log a message to the asterisk verbose log.
 
         :param level:
             Verbosity level.
@@ -1077,13 +1034,12 @@ class Base(object):
             bool
         """
         cmd = 'VERBOSE "%s" %s' % (message, level)
-        agi_send(cmd)
+        utils.agi_send(cmd)
 
         return True
 
     def wait_for_digit(self, timeout):
-        """
-        Wait up to x amount of milliseconds for channel to receive a DTMF
+        """Wait up to x amount of milliseconds for channel to receive a DTMF
         digit.
 
         :param timeout:
@@ -1103,7 +1059,7 @@ class Base(object):
         result = True
         digit = ''
 
-        res = agi_send(cmd)[1]
+        res = utils.agi_send(cmd)[1]
 
         if res == '-1':
             result = False
@@ -1116,7 +1072,7 @@ class Base(object):
         result = True
         dtmf = ''
 
-        res, args = agi_send(cmd)[1:]
+        res, args = utils.agi_send(cmd)[1:]
         endpos = args.replace('endpos=', '')
 
         if res == '-1':
@@ -1132,7 +1088,7 @@ class Base(object):
         ret_timeout = False
         result = True
 
-        res, args = agi_send(cmd)[1:]
+        res, args = utils.agi_send(cmd)[1:]
         dtmf = res
 
         if res == '-1':

@@ -13,25 +13,26 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 # implied.
 
-from cStringIO import StringIO
-from mock import patch
+import cStringIO
+import mock
+
 from sarlacc.tests.asterisk.agi import test
 
 
 class TestCase(test.TestCase):
 
+    @mock.patch('sys.stdin', cStringIO.StringIO("200 result=0"))
     def test_database_del_failure(self):
-        with patch('sys.stdin', StringIO("200 result=0")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
+        with mock.patch(
+                'sys.stdout', new_callable=cStringIO.StringIO) as mock_stdout:
             res = self.agi.database_del(family='Foo', key='Bar')
-            self.assertEqual(mocked_out.getvalue(), 'DATABASE DEL Foo Bar\n')
+            self.assertEqual(mock_stdout.getvalue(), 'DATABASE DEL Foo Bar\n')
             self.assertFalse(res)
 
+    @mock.patch('sys.stdin', cStringIO.StringIO("200 result=1"))
     def test_database_del_success(self):
-        with patch('sys.stdin', StringIO("200 result=1")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
+        with mock.patch(
+                'sys.stdout', new_callable=cStringIO.StringIO) as mock_stdout:
             res = self.agi.database_del(family='SIP', key='1001')
-            self.assertEqual(mocked_out.getvalue(), 'DATABASE DEL SIP 1001\n')
+            self.assertEqual(mock_stdout.getvalue(), 'DATABASE DEL SIP 1001\n')
             self.assertTrue(res)

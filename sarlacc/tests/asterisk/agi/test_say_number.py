@@ -13,54 +13,57 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 # implied.
 
-from cStringIO import StringIO
-from mock import patch
+import cStringIO
+import mock
+
 from sarlacc.tests.asterisk.agi import test
 
 
 class TestCase(test.TestCase):
 
+    @mock.patch('sys.stdin', cStringIO.StringIO("200 result=-1"))
     def test_say_number_failure(self):
-        with patch('sys.stdin', StringIO("200 result=-1")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
+        with mock.patch(
+                'sys.stdout', new_callable=cStringIO.StringIO) as mock_stdout:
             res, dtmf = self.agi.say_number(string='2000')
-            self.assertEqual(mocked_out.getvalue(), 'SAY NUMBER 2000 ""\n')
+            self.assertEqual(mock_stdout.getvalue(), 'SAY NUMBER 2000 ""\n')
             self.assertFalse(res)
             self.assertEqual(dtmf, '')
 
+    @mock.patch('sys.stdin', cStringIO.StringIO("200 result=0"))
     def test_say_number_success(self):
-        with patch('sys.stdin', StringIO("200 result=0")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
+        with mock.patch(
+                'sys.stdout', new_callable=cStringIO.StringIO) as mock_stdout:
             res, dtmf = self.agi.say_number(string='25000')
-            self.assertEqual(mocked_out.getvalue(), 'SAY NUMBER 25000 ""\n')
+            self.assertEqual(mock_stdout.getvalue(), 'SAY NUMBER 25000 ""\n')
             self.assertTrue(res)
             self.assertEqual(dtmf, '')
 
+    @mock.patch('sys.stdin', cStringIO.StringIO("200 result=0"))
     def test_say_number_with_female_gender(self):
-        with patch('sys.stdin', StringIO("200 result=0")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
+        with mock.patch(
+                'sys.stdout', new_callable=cStringIO.StringIO) as mock_stdout:
             res, dtmf = self.agi.say_number(string='25000', gender=False)
-            self.assertEqual(mocked_out.getvalue(), 'SAY NUMBER 25000 "" f\n')
+            self.assertEqual(mock_stdout.getvalue(), 'SAY NUMBER 25000 "" f\n')
             self.assertTrue(res)
             self.assertEqual(dtmf, '')
 
+    @mock.patch('sys.stdin', cStringIO.StringIO("200 result=0"))
     def test_say_number_with_male_gender(self):
-        with patch('sys.stdin', StringIO("200 result=0")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
+        with mock.patch(
+                'sys.stdout', new_callable=cStringIO.StringIO) as mock_stdout:
             res, dtmf = self.agi.say_number(string='25000', gender=True)
-            self.assertEqual(mocked_out.getvalue(), 'SAY NUMBER 25000 "" m\n')
+            self.assertEqual(mock_stdout.getvalue(), 'SAY NUMBER 25000 "" m\n')
             self.assertTrue(res)
             self.assertEqual(dtmf, '')
 
+    @mock.patch('sys.stdin', cStringIO.StringIO("200 result=49"))
     def test_say_number_digit_pressed(self):
-        with patch('sys.stdin', StringIO("200 result=49")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
+        with mock.patch(
+                'sys.stdout', new_callable=cStringIO.StringIO) as mock_stdout:
             res, dtmf = self.agi.say_number(string='5000', digits='1234')
-            self.assertEqual(mocked_out.getvalue(), 'SAY NUMBER 5000 "1234"\n')
+            self.assertEqual(
+                mock_stdout.getvalue(), 'SAY NUMBER 5000 "1234"\n'
+            )
             self.assertTrue(res)
             self.assertEqual(dtmf, '1')

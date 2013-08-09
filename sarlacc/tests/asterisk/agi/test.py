@@ -13,7 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 # implied.
 
-from sarlacc.asterisk.client import AGI
+from sarlacc.asterisk import client
 from sarlacc import test
 
 
@@ -23,4 +23,4 @@ class TestCase(test.TestCase):
     def setUp(self):
         """Run before each method to initialize test environment."""
         super(TestCase, self).setUp()
-        self.agi = AGI()
+        self.agi = client.AGI()

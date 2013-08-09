@@ -17,9 +17,9 @@
 Asterisk AGI
 """
 
-from sarlacc.asterisk.agi.base import Base
+from sarlacc.asterisk.agi import base
 
 
-class AGI(Base):
+class AGI(base.Base):
     def __init__(self):
-        Base.__init__(self)
+        super(AGI, self).__init__()

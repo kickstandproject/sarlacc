@@ -13,25 +13,26 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 # implied.
 
-from cStringIO import StringIO
-from mock import patch
+import cStringIO
+import mock
+
 from sarlacc.tests.asterisk.agi import test
 
 
 class TestCase(test.TestCase):
 
+    @mock.patch('sys.stdin', cStringIO.StringIO("200 result=0"))
     def test_speech_create_failure(self):
-        with patch('sys.stdin', StringIO("200 result=0")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
+        with mock.patch(
+                'sys.stdout', new_callable=cStringIO.StringIO) as mock_stdout:
             res = self.agi.speech_create(engine='GOOGLE')
-            self.assertEqual(mocked_out.getvalue(), 'SPEECH CREATE GOOGLE\n')
+            self.assertEqual(mock_stdout.getvalue(), 'SPEECH CREATE GOOGLE\n')
             self.assertFalse(res)
 
+    @mock.patch('sys.stdin', cStringIO.StringIO("200 result=1"))
     def test_speech_create_success(self):
-        with patch('sys.stdin', StringIO("200 result=1")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
+        with mock.patch(
+                'sys.stdout', new_callable=cStringIO.StringIO) as mock_stdout:
             res = self.agi.speech_create(engine='digium')
-            self.assertEqual(mocked_out.getvalue(), 'SPEECH CREATE digium\n')
+            self.assertEqual(mock_stdout.getvalue(), 'SPEECH CREATE digium\n')
             self.assertTrue(res)

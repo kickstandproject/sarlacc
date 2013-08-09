@@ -13,62 +13,63 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 # implied.
 
-from cStringIO import StringIO
-from mock import patch
+import cStringIO
+import mock
+
 from sarlacc.tests.asterisk.agi import test
 
 
 class TestCase(test.TestCase):
 
+    @mock.patch('sys.stdin', cStringIO.StringIO("200 result=-1"))
     def test_control_stream_file_failure(self):
-        with patch('sys.stdin', StringIO("200 result=-1")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
+        with mock.patch(
+                'sys.stdout', new_callable=cStringIO.StringIO) as mock_stdout:
             res, dtmf = self.agi.control_stream_file(
                 filename='HelloWorld!'
             )
             self.assertEqual(
-                mocked_out.getvalue(),
+                mock_stdout.getvalue(),
                 'CONTROL STREAM FILE HelloWorld! "" "" "*" "#" ""\n')
             self.assertFalse(res)
             self.assertEqual(dtmf, '')
 
+    @mock.patch('sys.stdin', cStringIO.StringIO("200 result=0"))
     def test_control_stream_file_success(self):
-        with patch('sys.stdin', StringIO("200 result=0")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
+        with mock.patch(
+                'sys.stdout', new_callable=cStringIO.StringIO) as mock_stdout:
             res, dtmf = self.agi.control_stream_file(
                 filename='demo-congrats'
             )
             self.assertEqual(
-                mocked_out.getvalue(),
+                mock_stdout.getvalue(),
                 'CONTROL STREAM FILE demo-congrats "" "" "*" "#" ""\n')
             self.assertTrue(res)
             self.assertEqual(dtmf, '')
 
+    @mock.patch('sys.stdin', cStringIO.StringIO("200 result=0"))
     def test_control_stream_file_with_args_success(self):
-        with patch('sys.stdin', StringIO("200 result=0")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
+        with mock.patch(
+                'sys.stdout', new_callable=cStringIO.StringIO) as mock_stdout:
             res, dtmf = self.agi.control_stream_file(
                 filename='demo-congrats', skipms='1221', forward='1',
                 rewind='3', pause='9',
             )
             self.assertEqual(
-                mocked_out.getvalue(),
+                mock_stdout.getvalue(),
                 'CONTROL STREAM FILE demo-congrats "" "1221" "1" "3" "9"\n')
             self.assertTrue(res)
             self.assertEqual(dtmf, '')
 
+    @mock.patch('sys.stdin', cStringIO.StringIO("200 result=50"))
     def test_control_stream_file_digits_pressed(self):
-        with patch('sys.stdin', StringIO("200 result=50")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
+        with mock.patch(
+                'sys.stdout', new_callable=cStringIO.StringIO) as mock_stdout:
             res, dtmf = self.agi.control_stream_file(
                 filename='demo-congrats', digits='0123'
             )
             self.assertEqual(
-                mocked_out.getvalue(),
+                mock_stdout.getvalue(),
                 'CONTROL STREAM FILE demo-congrats "0123" "" "*" "#" ""\n')
             self.assertTrue(res)
             self.assertEqual(dtmf, '2')

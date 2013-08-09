@@ -13,28 +13,29 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 # implied.
 
-from cStringIO import StringIO
-from mock import patch
+import cStringIO
+import mock
+
 from sarlacc.tests.asterisk.agi import test
 
 
 class TestCase(test.TestCase):
 
+    @mock.patch('sys.stdin', cStringIO.StringIO("200 result=-1"))
     def test_send_image_failure(self):
-        with patch('sys.stdin', StringIO("200 result=-1")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
+        with mock.patch(
+                'sys.stdout', new_callable=cStringIO.StringIO) as mock_stdout:
             res = self.agi.send_image(filename='dealwithit.png')
             self.assertEqual(
-                mocked_out.getvalue(), 'SEND IMAGE dealwithit.png\n'
+                mock_stdout.getvalue(), 'SEND IMAGE dealwithit.png\n'
             )
             self.assertFalse(res)
 
+    @mock.patch('sys.stdin', cStringIO.StringIO("200 result=0"))
     def test_send_image_success(self):
-        with patch('sys.stdin', StringIO("200 result=0")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
+        with mock.patch(
+                'sys.stdout', new_callable=cStringIO.StringIO) as mock_stdout:
             res = self.agi.send_image(filename='dealwithit')
             self.assertEqual(
-                mocked_out.getvalue(), 'SEND IMAGE dealwithit\n')
+                mock_stdout.getvalue(), 'SEND IMAGE dealwithit\n')
             self.assertTrue(res)

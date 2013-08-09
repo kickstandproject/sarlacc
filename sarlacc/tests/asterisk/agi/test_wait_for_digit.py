@@ -13,36 +13,37 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 # implied.
 
-from cStringIO import StringIO
-from mock import patch
+import cStringIO
+import mock
+
 from sarlacc.tests.asterisk.agi import test
 
 
 class TestCase(test.TestCase):
 
+    @mock.patch('sys.stdin', cStringIO.StringIO("200 result=-1"))
     def test_wait_for_digit_failure(self):
-        with patch('sys.stdin', StringIO("200 result=-1")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
+        with mock.patch(
+                'sys.stdout', new_callable=cStringIO.StringIO) as mock_stdout:
             res, dtmf = self.agi.wait_for_digit(timeout='2000')
-            self.assertEqual(mocked_out.getvalue(), 'WAIT FOR DIGIT 2000\n')
+            self.assertEqual(mock_stdout.getvalue(), 'WAIT FOR DIGIT 2000\n')
             self.assertFalse(res)
             self.assertEqual(dtmf, '')
 
+    @mock.patch('sys.stdin', cStringIO.StringIO("200 result=51"))
     def test_wait_for_digit_success(self):
-        with patch('sys.stdin', StringIO("200 result=51")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
+        with mock.patch(
+                'sys.stdout', new_callable=cStringIO.StringIO) as mock_stdout:
             res, dtmf = self.agi.wait_for_digit(timeout='25000')
-            self.assertEqual(mocked_out.getvalue(), 'WAIT FOR DIGIT 25000\n')
+            self.assertEqual(mock_stdout.getvalue(), 'WAIT FOR DIGIT 25000\n')
             self.assertTrue(res)
             self.assertEqual(dtmf, '3')
 
+    @mock.patch('sys.stdin', cStringIO.StringIO("200 result=0"))
     def test_wait_for_digit_timeout(self):
-        with patch('sys.stdin', StringIO("200 result=0")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
+        with mock.patch(
+                'sys.stdout', new_callable=cStringIO.StringIO) as mock_stdout:
             res, dtmf = self.agi.wait_for_digit(timeout='5000')
-            self.assertEqual(mocked_out.getvalue(), 'WAIT FOR DIGIT 5000\n')
+            self.assertEqual(mock_stdout.getvalue(), 'WAIT FOR DIGIT 5000\n')
             self.assertTrue(res)
             self.assertEqual(dtmf, '')

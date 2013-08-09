@@ -13,18 +13,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 # implied.
 
-from cStringIO import StringIO
-from mock import patch
+import cStringIO
+import mock
+
 from sarlacc.tests.asterisk.agi import test
 
 
 class TestCase(test.TestCase):
 
+    @mock.patch('sys.stdin', cStringIO.StringIO("200 result=0"))
     def test_set_auto_hangup_success(self):
-        with patch('sys.stdin', StringIO("200 result=0")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
+        with mock.patch(
+                'sys.stdout', new_callable=cStringIO.StringIO) as mock_stdout:
             res = self.agi.set_auto_hangup(time='3000')
             self.assertEqual(
-                mocked_out.getvalue(), 'SET AUTOHANGUP 3000\n')
+                mock_stdout.getvalue(), 'SET AUTOHANGUP 3000\n')
             self.assertTrue(res)

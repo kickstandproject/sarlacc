@@ -13,44 +13,45 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 # implied.
 
-from cStringIO import StringIO
-from mock import patch
+import cStringIO
+import mock
+
 from sarlacc.tests.asterisk.agi import test
 
 
 class TestCase(test.TestCase):
 
+    @mock.patch('sys.stdin', cStringIO.StringIO("200 result=0"))
     def test_get_full_variable_failure(self):
-        with patch('sys.stdin', StringIO("200 result=0")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
+        with mock.patch(
+                'sys.stdout', new_callable=cStringIO.StringIO) as mock_stdout:
             res, value = self.agi.get_full_variable(name='FOO')
             self.assertEqual(
-                mocked_out.getvalue(), 'GET FULL VARIABLE FOO\n'
+                mock_stdout.getvalue(), 'GET FULL VARIABLE FOO\n'
             )
             self.assertFalse(res)
             self.assertEqual(value, '')
 
+    @mock.patch('sys.stdin', cStringIO.StringIO("200 result=1 (example.org)"))
     def test_get_full_variable_success(self):
-        with patch('sys.stdin', StringIO("200 result=1 (example.org)")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
+        with mock.patch(
+                'sys.stdout', new_callable=cStringIO.StringIO) as mock_stdout:
             res, value = self.agi.get_full_variable(name='SIPDOMAIN')
             self.assertEqual(
-                mocked_out.getvalue(), 'GET FULL VARIABLE SIPDOMAIN\n'
+                mock_stdout.getvalue(), 'GET FULL VARIABLE SIPDOMAIN\n'
             )
             self.assertTrue(res)
             self.assertEqual(value, 'example.org')
 
+    @mock.patch('sys.stdin', cStringIO.StringIO("200 result=1 (bob)"))
     def test_get_full_variable_channel_success(self):
-        with patch('sys.stdin', StringIO("200 result=1 (bob)")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
+        with mock.patch(
+                'sys.stdout', new_callable=cStringIO.StringIO) as mock_stdout:
             res, value = self.agi.get_full_variable(
                 name='ALICE', channel='Local/foo-bar'
             )
             self.assertEqual(
-                mocked_out.getvalue(),
+                mock_stdout.getvalue(),
                 'GET FULL VARIABLE ALICE Local/foo-bar\n'
             )
             self.assertTrue(res)

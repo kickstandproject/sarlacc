@@ -13,36 +13,37 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 # implied.
 
-from cStringIO import StringIO
-from mock import patch
+import cStringIO
+import mock
+
 from sarlacc.tests.asterisk.agi import test
 
 
 class TestCase(test.TestCase):
 
+    @mock.patch('sys.stdin', cStringIO.StringIO("200 result=-1"))
     def test_say_alpha_failure(self):
-        with patch('sys.stdin', StringIO("200 result=-1")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
+        with mock.patch(
+                'sys.stdout', new_callable=cStringIO.StringIO) as mock_stdout:
             res, dtmf = self.agi.say_alpha(string='2000')
-            self.assertEqual(mocked_out.getvalue(), 'SAY ALPHA 2000 ""\n')
+            self.assertEqual(mock_stdout.getvalue(), 'SAY ALPHA 2000 ""\n')
             self.assertFalse(res)
             self.assertEqual(dtmf, '')
 
+    @mock.patch('sys.stdin', cStringIO.StringIO("200 result=0"))
     def test_say_alpha_success(self):
-        with patch('sys.stdin', StringIO("200 result=0")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
+        with mock.patch(
+                'sys.stdout', new_callable=cStringIO.StringIO) as mock_stdout:
             res, dtmf = self.agi.say_alpha(string='25000')
-            self.assertEqual(mocked_out.getvalue(), 'SAY ALPHA 25000 ""\n')
+            self.assertEqual(mock_stdout.getvalue(), 'SAY ALPHA 25000 ""\n')
             self.assertTrue(res)
             self.assertEqual(dtmf, '')
 
+    @mock.patch('sys.stdin', cStringIO.StringIO("200 result=49"))
     def test_say_alpha_digit_pressed(self):
-        with patch('sys.stdin', StringIO("200 result=49")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
+        with mock.patch(
+                'sys.stdout', new_callable=cStringIO.StringIO) as mock_stdout:
             res, dtmf = self.agi.say_alpha(string='5000', digits='1234')
-            self.assertEqual(mocked_out.getvalue(), 'SAY ALPHA 5000 "1234"\n')
+            self.assertEqual(mock_stdout.getvalue(), 'SAY ALPHA 5000 "1234"\n')
             self.assertTrue(res)
             self.assertEqual(dtmf, '1')

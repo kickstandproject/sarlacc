@@ -13,35 +13,36 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 # implied.
 
-from cStringIO import StringIO
-from mock import patch
+import cStringIO
+import mock
+
 from sarlacc.tests.asterisk.agi import test
 
 
 class TestCase(test.TestCase):
 
+    @mock.patch('sys.stdin', cStringIO.StringIO("200 result=0"))
     def test_database_get_failure(self):
-        with patch('sys.stdin', StringIO("200 result=0")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
+        with mock.patch(
+                'sys.stdout', new_callable=cStringIO.StringIO) as mock_stdout:
             res, value = self.agi.database_get(
                 family='FOO', key='BAR'
             )
             self.assertEqual(
-                mocked_out.getvalue(), 'DATABASE GET FOO BAR\n'
+                mock_stdout.getvalue(), 'DATABASE GET FOO BAR\n'
             )
             self.assertFalse(res)
             self.assertEqual(value, '')
 
+    @mock.patch('sys.stdin', cStringIO.StringIO("200 result=1 (tada!)"))
     def test_database_get_success(self):
-        with patch('sys.stdin', StringIO("200 result=1 (tada!)")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
+        with mock.patch(
+                'sys.stdout', new_callable=cStringIO.StringIO) as mock_stdout:
             res, value = self.agi.database_get(
                 family='SIP', key='1234'
             )
             self.assertEqual(
-                mocked_out.getvalue(), 'DATABASE GET SIP 1234\n'
+                mock_stdout.getvalue(), 'DATABASE GET SIP 1234\n'
             )
             self.assertTrue(res)
             self.assertEqual(value, 'tada!')

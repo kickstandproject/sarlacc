@@ -13,35 +13,36 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 # implied.
 
-from cStringIO import StringIO
-from mock import patch
+import cStringIO
+import mock
+
 from sarlacc.tests.asterisk.agi import test
 
 
 class TestCase(test.TestCase):
 
+    @mock.patch('sys.stdin', cStringIO.StringIO("200 result=-1"))
     def test_hangup_failure(self):
-        with patch('sys.stdin', StringIO("200 result=-1")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
+        with mock.patch(
+                'sys.stdout', new_callable=cStringIO.StringIO) as mock_stdout:
             res = self.agi.hangup()
-            self.assertEqual(mocked_out.getvalue(), 'HANGUP\n')
+            self.assertEqual(mock_stdout.getvalue(), 'HANGUP\n')
             self.assertFalse(res)
 
+    @mock.patch('sys.stdin', cStringIO.StringIO("200 result=1"))
     def test_hangup_success(self):
-        with patch('sys.stdin', StringIO("200 result=1")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
+        with mock.patch(
+                'sys.stdout', new_callable=cStringIO.StringIO) as mock_stdout:
             res = self.agi.hangup()
-            self.assertEqual(mocked_out.getvalue(), 'HANGUP\n')
+            self.assertEqual(mock_stdout.getvalue(), 'HANGUP\n')
             self.assertTrue(res)
 
+    @mock.patch('sys.stdin', cStringIO.StringIO("200 result=1"))
     def test_hangup_success_with_args(self):
-        with patch('sys.stdin', StringIO("200 result=1")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
+        with mock.patch(
+                'sys.stdout', new_callable=cStringIO.StringIO) as mock_stdout:
             res = self.agi.hangup(channel='Local/1@public-03f5;1')
             self.assertEqual(
-                mocked_out.getvalue(), 'HANGUP Local/1@public-03f5;1\n'
+                mock_stdout.getvalue(), 'HANGUP Local/1@public-03f5;1\n'
             )
             self.assertTrue(res)

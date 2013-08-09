@@ -13,25 +13,28 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 # implied.
 
-from cStringIO import StringIO
-from mock import patch
+import cStringIO
+import mock
+
 from sarlacc.tests.asterisk.agi import test
 
 
 class TestCase(test.TestCase):
 
+    @mock.patch('sys.stdin', cStringIO.StringIO("200 result=0"))
     def test_speech_set_failure(self):
-        with patch('sys.stdin', StringIO("200 result=0")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
+        with mock.patch(
+                'sys.stdout', new_callable=cStringIO.StringIO) as mock_stdout:
             res = self.agi.speech_set(name='foo', value='bar')
-            self.assertEqual(mocked_out.getvalue(), 'SPEECH SET foo bar\n')
+            self.assertEqual(mock_stdout.getvalue(), 'SPEECH SET foo bar\n')
             self.assertFalse(res)
 
+    @mock.patch('sys.stdin', cStringIO.StringIO("200 result=1"))
     def test_speech_set_success(self):
-        with patch('sys.stdin', StringIO("200 result=1")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
+        with mock.patch(
+                'sys.stdout', new_callable=cStringIO.StringIO) as mock_stdout:
             res = self.agi.speech_set(name='enable', value='true')
-            self.assertEqual(mocked_out.getvalue(), 'SPEECH SET enable true\n')
+            self.assertEqual(
+                mock_stdout.getvalue(), 'SPEECH SET enable true\n'
+            )
             self.assertTrue(res)

@@ -13,64 +13,73 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 # implied.
 
-from cStringIO import StringIO
-from mock import patch
+import cStringIO
+import mock
+
 from sarlacc.tests.asterisk.agi import test
 
 
 class TestCase(test.TestCase):
 
+    @mock.patch('sys.stdin', cStringIO.StringIO(
+        "200 result=0 endpos=0")
+    )
     def test_get_option_does_not_exist(self):
-        with patch('sys.stdin', StringIO("200 result=0 endpos=0")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
+        with mock.patch(
+                'sys.stdout', new_callable=cStringIO.StringIO) as mock_stdout:
             res, dtmf, endpos = self.agi.get_option(
                 filename='demo-congrats.gsm'
             )
             self.assertEqual(
-                mocked_out.getvalue(),
+                mock_stdout.getvalue(),
                 'GET OPTION demo-congrats.gsm "" 0\n')
             self.assertFalse(res)
             self.assertEqual(dtmf, '')
             self.assertEqual(endpos, '0')
 
+    @mock.patch('sys.stdin', cStringIO.StringIO(
+        "200 result=-1 endpos=0")
+    )
     def test_get_option_failure(self):
-        with patch('sys.stdin', StringIO("200 result=-1 endpos=0")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
+        with mock.patch(
+                'sys.stdout', new_callable=cStringIO.StringIO) as mock_stdout:
             res, dtmf, endpos = self.agi.get_option(
                 filename='HelloWorld!'
             )
             self.assertEqual(
-                mocked_out.getvalue(),
+                mock_stdout.getvalue(),
                 'GET OPTION HelloWorld! "" 0\n')
             self.assertFalse(res)
             self.assertEqual(dtmf, '')
             self.assertEqual(endpos, '0')
 
+    @mock.patch('sys.stdin', cStringIO.StringIO(
+        "200 result=0 endpos=223680")
+    )
     def test_get_option_success(self):
-        with patch('sys.stdin', StringIO("200 result=0 endpos=223680")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
+        with mock.patch(
+                'sys.stdout', new_callable=cStringIO.StringIO) as mock_stdout:
             res, dtmf, endpos = self.agi.get_option(
                 filename='demo-congrats'
             )
             self.assertEqual(
-                mocked_out.getvalue(),
+                mock_stdout.getvalue(),
                 'GET OPTION demo-congrats "" 0\n')
             self.assertTrue(res)
             self.assertEqual(dtmf, '')
             self.assertEqual(endpos, '223680')
 
+    @mock.patch('sys.stdin', cStringIO.StringIO(
+        "200 result=50 endpos=135297")
+    )
     def test_get_option_digits_pressed(self):
-        with patch('sys.stdin', StringIO("200 result=50 endpos=135297")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
+        with mock.patch(
+                'sys.stdout', new_callable=cStringIO.StringIO) as mock_stdout:
             res, dtmf, endpos = self.agi.get_option(
                 filename='demo-congrats', digits='0123'
             )
             self.assertEqual(
-                mocked_out.getvalue(),
+                mock_stdout.getvalue(),
                 'GET OPTION demo-congrats "0123" 0\n')
             self.assertTrue(res)
             self.assertEqual(dtmf, '2')

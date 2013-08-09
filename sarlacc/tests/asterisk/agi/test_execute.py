@@ -13,27 +13,28 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 # implied.
 
-from cStringIO import StringIO
-from mock import patch
+import cStringIO
+import mock
+
 from sarlacc.tests.asterisk.agi import test
 
 
 class TestCase(test.TestCase):
 
+    @mock.patch('sys.stdin', cStringIO.StringIO("200 result=-2"))
     def test_execute_failure(self):
-        with patch('sys.stdin', StringIO("200 result=-2")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
+        with mock.patch(
+                'sys.stdout', new_callable=cStringIO.StringIO) as mock_stdout:
             res, args = self.agi.execute('NoOp1')
-            self.assertEqual(mocked_out.getvalue(), 'EXEC NoOp1\n')
+            self.assertEqual(mock_stdout.getvalue(), 'EXEC NoOp1\n')
             self.assertFalse(res)
             self.assertEquals(args, '')
 
+    @mock.patch('sys.stdin', cStringIO.StringIO("200 result=1"))
     def test_execute_success(self):
-        with patch('sys.stdin', StringIO("200 result=1")
-                   ), patch('sys.stdout',
-                            new_callable=StringIO) as mocked_out:
+        with mock.patch(
+                'sys.stdout', new_callable=cStringIO.StringIO) as mock_stdout:
             res, args = self.agi.execute('NoOp', 'HelloWorld!')
-            self.assertEqual(mocked_out.getvalue(), 'EXEC NoOp HelloWorld!\n')
+            self.assertEqual(mock_stdout.getvalue(), 'EXEC NoOp HelloWorld!\n')
             self.assertTrue(res)
             self.assertEqual(args, '1')
