@@ -4,6 +4,7 @@
 .coverage
 .testrepository/*
 .tox/*
+.venv/*
 AUTHORS
 ChangeLog
 cover/*
