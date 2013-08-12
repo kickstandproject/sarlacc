@@ -273,8 +273,8 @@ class OpenSSLConnectionDelegator(object):
 class VerifiedHTTPSConnection(httplib.HTTPSConnection):
     """Extended HTTPSConnection which uses the OpenSSL library
     for enhanced SSL support.
-    Note: Much of this functionality can eventually be replaced
-          with native Python 3.3 code.
+    Note: Much of this functionality can eventually be replaced with native
+    Python 3.3 code.
     """
     def __init__(self, host, port=None, key_file=None, cert_file=None,
                  cacert=None, timeout=None, insecure=False,

@@ -8,10 +8,13 @@ Welcome to Sarlacc's documentation!
 
 Contents:
 
-.. toctree::
-   :maxdepth: 2
+Modules
+=======
 
-   agi
+.. toctree::
+   :maxdepth: 1
+
+   modules/modules
 
 Indices and tables
 ==================
