@@ -5,6 +5,7 @@ hacking>=0.5.3,<0.6
 
 coverage
 mock
+pylint
 sphinx
 testrepository>=0.0.13
 testtools>=0.9.27
