@@ -16,6 +16,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""
+Asterisk ARI client
+"""
+
 from sarlacc.asterisk.ari import asterisk
 from sarlacc.common import http
 
