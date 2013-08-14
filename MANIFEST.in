@@ -1,8 +1,7 @@
 include AUTHORS
-include LICENSE
-include README.rst
 include ChangeLog
-include tox.ini
-include sarlacc/versioninfo
-recursive-include doc *
-recursive-include tools *
+
+exclude .gitignore
+exclude .gitreview
+
+global-exclude *.pyc
